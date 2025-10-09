@@ -1,0 +1,452 @@
+#createFormHeader {
+    padding: 0.5em 2em;
+    background-color: white;
+    width:  50dvw;
+    margin: 1em auto 1em 1em;
+    box-shadow: 0 0 3px 1px rgba(0, 0, 0, 0.066);
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#createFormHeader input {
+    font-family: 'Inknut Antiqua Regular';
+    font-size: 1em;
+    border: none;
+    height: min-content;
+    width: 75%;
+
+    user-select: none;
+    outline: none;
+}
+
+#createFormHeader button {
+    font-family: 'Inknut Antiqua Regular';
+    background-color: black;
+    color: white !important;
+    padding: 0 2em;
+
+    border-radius: 8px;
+    border: solid 2px black;
+    cursor: pointer;
+    box-shadow: 0 0 3px 1px rgba(0, 0, 0, 0);
+}
+
+#createFormHeader button:hover {
+    background-color: white;
+    color: black !important;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.365);
+}
+
+#root {
+    padding: 0 !important;
+    width:  75%;
+}
+
+.success, .error {
+    font-size: small;
+    font-family: 'Inknut Antiqua Light';
+    line-height: 1em;
+    margin: 1em;
+}
+
+
+
+
+#formEditingHeader {
+    display: flex;
+    gap: 1em;
+
+    align-items: center;
+}
+
+#formEditingHeader input {
+    font-family: 'Inknut Antiqua Regular';
+    border: none;
+    height: min-content;
+    width: 40%;
+    font-size: larger;
+
+    user-select: none;
+    outline: none;   
+    background-color: rgba(0, 0, 0, 0); 
+}
+
+#formEditingHeader div #deleteModule, #saveModule {
+    font-family: 'Inknut Antiqua Light';
+    padding: 0 1.2em;
+    margin: 1.5em 0 1em 1.5em;
+    color: white !important;
+
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#saveModule{background-color: #47B991;}
+#deleteModule{background-color: #B94747;}
+
+#saveModule:hover {
+    text-shadow: 0 0 3px 0 white;
+    box-shadow: 0 0 3px 0 rgb(223, 253, 233);
+    background-color: #42c798;
+}
+
+
+#deleteModule:hover {
+    text-shadow: 0 0 3px 0 white;
+    box-shadow: 0 0 3px 0 rgb(255, 195, 195);
+    background-color: #cd4a4a;
+}
+
+
+
+
+#formPage {
+    background-color: white;
+    padding: 0 1em 1em 1em;
+    margin: 1em 1em 0 1em !important;
+}
+
+
+.question {
+    background-color: #E5F5FF;
+    margin: 1em 2.5em;
+
+    border: none !important;
+    border-radius: 4px;
+    color: black;
+}
+
+.questionHeader input {
+    font-family: 'Inknut Antiqua Light';
+    user-select: none;
+    outline: none;
+    border: none;
+    width: 100%;
+    background-color: #e5f5ff00;
+}
+
+.questionHeader textarea {
+    font-family: 'Inknut Antiqua Light';
+    line-height: 1em;
+    background-color: #C1DAEA;
+    outline: 0;
+    border-radius: 8px;
+    border: none;
+    padding: 1em;
+    width: 75%;
+    height: auto;
+}
+
+input[type="file"]::file-selector-button {
+    opacity: 0;
+    width: 1px;
+}
+
+.questionImagePackage button {
+    font-family: 'Inknut Antiqua Regular';
+    width: max-content;
+    background-color: #85B5D4;
+    border: 0;
+    padding: 0em 1em;
+    border-radius: 8px;
+}
+
+.questionImagePackage button:hover {
+    cursor: pointer;
+    background-color: #88bee3;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.354);
+}
+
+/* option UI for the multiple choice area */
+.option {
+    display: flex; 
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center !important;
+    border: solid 1px rgba(0, 0, 0, 0);
+
+    margin: 1em 0;
+}
+
+.optionBackground {
+    background-color: #C1DAEA;
+    border-radius: 4px;
+}
+
+.optionImage {
+    font-family: 'Inknut Antiqua Light';
+    font-size: x-small !important;
+    color: black;
+    background-color: #42c79800 !important;
+}
+
+.optionImageGroup button {
+    font-family: 'Inknut Antiqua Regular';
+    width: max-content;
+    background-color: #85B5D4;
+    border: 0;
+    padding: 0em 1em;
+    border-radius: 8px;
+    float: right;
+}
+
+.optionImageGroup button:hover {
+    cursor: pointer;
+    background-color: #88bee3;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.354);
+}
+
+.optionImageGroup label {
+    margin-left: auto;
+}
+
+.valueOptionGroup {
+    display: flex;
+    flex-grow: 1;
+    gap: 0.3em;
+}
+
+.valueOptionGroup button {
+    font-family: 'Inknut Antiqua Light';
+    line-height: 0;
+
+    color: white !important;
+    background-color: #919191;
+    border: 0;
+    padding: 0em 1.3em;
+    border-radius: 8px;
+
+    cursor: pointer;
+}
+
+.valueOptionGroup button:hover {
+    filter: brightness(120%);
+    box-shadow: inset 0 0 3px 0 rgba(0, 0, 0, 0.135);
+}
+
+.valueOptionGroup .setCorrect {
+    background-color: #42c798;
+}
+
+.valueOptionGroup input {
+    user-select: none;
+    outline: none;
+    border: none;
+    padding: 4px;
+    flex-grow: 1;
+    background-color: #e5f5ff00;    
+}
+
+.removeQuestion { 
+    font-family: 'Inknut Antiqua Light';
+    background-color: rgba(236, 236, 236, 0);   
+    border: solid 2px black;
+    border-radius: 8px;
+    line-height: 1em;
+    padding: 0.5em 0.6em;
+}
+
+.removeQuestion:hover {
+    cursor: pointer;
+    box-shadow: inset 0 0 2px 0 rgba(0, 0, 0, 0.25);
+    background-color: rgb(255, 255, 255); 
+}
+
+#formPage ul {
+    padding: 0 1em;
+    margin: 0 !important;
+    border-radius: 4px;
+}
+
+.question-type-selector {
+    margin: 1em 0 0 0;
+    display: flex;
+    justify-content: end;
+}
+
+.question-type-selector button{
+    font-family: 'Inknut Antiqua Light';
+    cursor: pointer;
+}
+
+.question-type-selector button:hover {
+    filter: brightness(105%);
+}
+
+.addOptiongroup {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.addOptiongroup button {
+    font-family: 'Inknut Antiqua Light';
+    line-height: 1.5em;
+
+    color: white !important;
+    background-color: #009DFF;
+    border: 0;
+    margin: 1em 8em 1em 16px;
+    padding: 0.1em 1.3em;
+    border-radius: 8px;
+}
+
+.addOptiongroup button:hover {
+    filter: brightness(115%);
+    cursor: pointer;
+}
+
+.addOptiongroup input[type="text"] {
+    user-select: none;
+    outline: none;
+    border: none;
+    padding: 4px;
+    flex-grow: 1;
+    background-color: #e5f5ff00;      
+}
+
+.addOptiongroup input[type="file"] {
+    font-family: 'Inknut Antiqua Light';
+    font-size: x-small;
+
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.addOptiongroup input[type="file"]::file-selector-button {
+    font-family: 'Franklin Gothic regular';
+}
+
+.connectingPairOptionBackground {
+    background-color: #C1DAEA;
+    border-radius: 4px;
+}
+
+
+#addQuestionInput {
+    font-family: 'Inknut Antiqua Light';
+    user-select: none;
+    outline: none;
+    border: none;
+
+    padding: 4px;
+    margin: 0 1em 0 4em;
+
+}
+
+#addQuestionButton {
+    font-family: 'Inknut Antiqua Light';
+    padding: 0 1.2em;
+    color: white !important;
+    background-color: #47B991;
+
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#addQuestionButton:hover {background-color: #44ca9b;}
+
+.pair {
+    display: flex;
+    align-items: center;
+}
+
+
+.pair div form {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pair div div {
+    border: none !important;
+}
+
+.pair div div form input {
+    border: none;
+    height: min-content;
+    width: 50%;
+    flex-grow: 1;
+
+    user-select: none;
+    outline: none;   
+    background-color: rgba(0, 0, 0, 0); 
+}
+
+.removePair {
+    font-family: 'Inknut Antiqua Light';
+    line-height: 1.7em;
+
+    color: white !important;
+    border: 0;
+    padding: 0em 1.3em;
+    border-radius: 8px;
+
+    cursor: pointer;  
+}
+
+.questionImageButtonConnecterDots {
+    font-family: 'Inknut Antiqua Regular';
+    width: max-content;
+    color: black !important;
+    background-color: #85B5D4;
+    border: 0;
+    padding: 0em 1em;
+    border-radius: 8px;
+}
+
+.questionImageButtonConnecterDots:hover {
+    cursor: pointer;
+    background-color: #88bee3;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.354);
+}
+
+.addOptionConnectingDots {
+    flex-grow: 1;
+    margin: 1em 16px;
+    display: flex;
+    align-items: center;
+}
+
+.addOptionConnectingDots button {
+    font-family: 'Inknut Antiqua Light';
+    line-height: 1.5em;
+
+    color: white !important;
+    background-color: #009DFF;
+    border: 0;
+    margin: 1em;
+    padding: 0.1em 1.3em;
+    border-radius: 8px;    
+}
+
+.addQuestionPair {
+    flex-grow: 1;
+}
+
+.addQuestionPair div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.addQuestionPair div input[type="text"] {
+    border: none;
+    height: min-content;
+    flex-grow: 1;
+
+    user-select: none;
+    outline: none;   
+    background-color: rgba(0, 0, 0, 0); 
+}
+
+.addQuestionPair div input[type="file"] {
+    font-family: 'Inknut Antiqua Light';
+    font-size: x-small;
+
+    cursor: pointer;
+}

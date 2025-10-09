@@ -1,0 +1,34 @@
+#content #title{
+    background-color: white;
+    color: black;
+    font-size: 2em;
+    font-family: 'Inknut Antiqua SemiBold';
+    padding: 0em  1em;
+    line-height: 2em;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    align-self: flex-start;
+    margin-left: 7%;
+}
+
+#content div{
+    padding: 1em;
+    font-family: 'Inknut Antiqua Regular';
+    font-size: 1.2em;
+    line-height: 1.5em;
+    color: black;
+    background-color: white;
+}
+
+#content #aboutUsSection{
+    width: 86%;
+    height: 75%;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.imageContainer{
+    background-color: rgb(57, 44, 18);
+}
+
+#showcase{
+    display: flex;
+}

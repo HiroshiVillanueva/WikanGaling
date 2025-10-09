@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Basic Forms Data Table (Vanilla JS)</title>
+    
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    
+    <h1>All Forms Data</h1>
+    <p id="status">Loading data...</p>
+    <div id="table-container">
+        </div>
+
+    <script>
+        // =================================================================
+        // 3. CONFIGURATION & INITIALIZATION (From your app.js)
+        // =================================================================
+
+        const SUPABASE_URL = "https://aliyyqinorqlwmjhbqza.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsaXl5cWlub3JxbHdtamhicXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxMDY2OTgsImV4cCI6MjA3NDY4MjY5OH0.wqmf23uvtil0BJ0qlk8qm_Wq7LsaD1ClZKwnDr1OxME"; 
+        const FORMS_TABLE = 'forms_metadata'; 
+
+        // Initialize Supabase Client
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); 
+
+        // Get the DOM elements
+        const statusElement = document.getElementById('status');
+        const tableContainer = document.getElementById('table-container');
+
+        // =================================================================
+        // 4. CORE FUNCTION: FETCH AND RENDER
+        // =================================================================
+
+        async function fetchAndRenderForms() {
+            try {
+                statusElement.textContent = "Fetching data...";
+
+                // Fetch ALL columns ('*') from the table
+                const { data, error } = await supabase
+                    .from(FORMS_TABLE)
+                    .select('*'); 
+                
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    statusElement.textContent = "No forms found in the database.";
+                    return;
+                }
+
+                // --- 5. DOM Manipulation to Build Table ---
+                
+                // 1. Clear status and create the table element
+                statusElement.textContent = `Successfully loaded ${data.length} forms.`;
+                const table = document.createElement('table');
+
+                // 2. Create the Table Header (The columns we want to display)
+                const thead = table.createTHead();
+                const headerRow = thead.insertRow();
+                ['ID (Partial)', 'Title', 'User ID (Partial)', 'Created At'].forEach(headerText => {
+                    let th = document.createElement('th');
+                    th.textContent = headerText;
+                    headerRow.appendChild(th);
+                });
+
+                // 3. Create the Table Body (The data rows)
+                const tbody = table.createTBody();
+                data.forEach(form => {
+                    const row = tbody.insertRow();
+                    
+                    // Column 1: ID (Truncated)
+                    row.insertCell().textContent = form.id.substring(0, 8) + '...';
+                    
+                    // Column 2: Title
+                    row.insertCell().textContent = form.title;
+                    
+                    // Column 3: User ID (Truncated) - added a check for safety
+                    row.insertCell().textContent = form.user_id ? form.user_id.substring(0, 8) + '...' : 'N/A';
+                    
+                    // Column 4: Created At (Formatted date)
+                    row.insertCell().textContent = new Date(form.created_at).toLocaleDateString();
+                });
+
+                // 4. Append the fully built table to the container
+                tableContainer.appendChild(table);
+
+            } catch (err) {
+                statusElement.textContent = `Error loading data: ${err.message}`;
+                statusElement.style.color = 'red';
+            }
+        }
+
+        // =================================================================
+        // 6. INITIAL CALL
+        // =================================================================
+        
+        // Run the function when the page loads
+        document.addEventListener('DOMContentLoaded', fetchAndRenderForms);
+    </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+@font-face {
+    font-family: 'Inknut Antiqua Regular';
+    font-style: normal;
+    font-weight: normal;
+    src: local('Inknut Antiqua Regular'), url('InknutAntiqua-Regular.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Inknut Antiqua Bold';
+    font-style: normal;
+    font-weight: normal;
+    src: local('Inknut Antiqua Bold'), url('InknutAntiqua-Bold.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Inknut Antiqua Light';
+    font-style: normal;
+    font-weight: normal;
+    src: local('Inknut Antiqua Light'), url('InknutAntiqua-Light.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Inknut Antiqua SemiBold';
+    font-style: normal;
+    font-weight: normal;
+    src: local('Inknut Antiqua SemiBold'), url('InknutAntiqua-SemiBold.woff') format('woff');
+}

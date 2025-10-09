@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WikanGaling Login</title>
+
+    <link rel="shortcut icon" href="Miscellanous/Images/Logo.svg" type="image/x-icon">   
+    <link rel="stylesheet" href="CSS/Standard/body.css">
+    <link rel="stylesheet" href="CSS/Standard/login.css">
+    <link rel="stylesheet" href="Miscellanous/Assests/Fonts.css">
+
+    <style>
+        /* Center the auth container */
+        .centered-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+    </style>
+</head>
+<body style="background-image: url(Miscellanous/Images/background.jpg);">
+    <main style="z-index: 2;">
+
+        <div id="loginCard">
+            <div id="loginHeader">
+                <h1>LOG INTO WIKANGALING</h1>
+                <a href="index.html"><img src="Miscellanous/Images/CloseW.png" alt=""></a>
+            </div>
+            <div id="loginForm"></div>
+        </div>
+
+        <div id="loginPage">
+        </div>
+    </main>
+    
+    <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.22.5/babel.min.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script> 
+
+    <script type="text/babel" src="JS/login.js"></script>
+</body>
+</html>

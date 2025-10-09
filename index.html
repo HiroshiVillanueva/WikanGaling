@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WikanGaling</title>
+
+    <link rel="shortcut icon" href="Miscellanous/Images/Logo.svg" type="image/x-icon">
+    <link rel="stylesheet" href="CSS/Standard/ScrollBar.css">
+    <link rel="stylesheet" href="CSS/Standard/body.css">
+    <link rel="stylesheet" href="CSS/Standard/Content.css">
+    <link rel="stylesheet" href="CSS/Navigation Bars/NavigationBar.css">
+    <link rel="stylesheet" href="CSS/Navigation Bars/SideBar.css">
+    <link rel="stylesheet" href="Miscellanous/Assests/Fonts.css">
+
+    <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.22.5/babel.min.js"></script> 
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script> 
+    <script type="text/babel" src="JS/forms_list_component.js"></script>
+</head>
+<body style="background-image: url(Miscellanous/Images/background.jpg);">
+    <main style="z-index: 2;">
+
+        <div id="Bars">
+            <aside id="SideBarMenu">
+                <img id="imgLogo" src="Miscellanous/Images/Logo.svg" alt="LOGO">
+                <div id="pageMenu">
+                    <div class="PageButtons" id="page_1">
+                        <img src="Miscellanous/Images/home.png" alt="*">
+                        <a id="link_1" href="index.html"><h2>HOME</h2></a>
+                    </div>
+
+                    <div class="PageButtons" id="page_2">
+                        <img src="Miscellanous/Images/writing.png" alt="*">
+                        <a id="link_2" href="module.html"><h2>CREATE</h2></a>
+                    </div>
+
+                    <div class="PageButtons" id="page_3">
+                        <img src="Miscellanous/Images/server.png" alt="*">
+                        <a id="link_3" href="dashboard.html"><h2>DASHBOARD</h2></a>
+                    </div>
+                </div>
+
+                <hr id="sideBarHR">
+
+
+                <div id="SavesMenu">
+                    <h3>SAVES: </h3>
+                    <div id="SavesPage">
+
+                        <div id="forms-list-container"></div>
+
+                    </div>
+                </div>
+
+
+                <div id="SidebarContext">
+                    <a href=""><i>Features</i></a>
+                    <a href="userManual.html"><i>User Manual</i></a>
+                    <a href=""><i>Rights Reserved</i></a>
+                </div>
+
+                <div id="WidthChanger"><img id="ArrowBtn" src="Miscellanous/Images/play.png" alt="Click" onclick="Ext_Rec()"></div>
+            </aside>
+            <nav>
+                <h1>WIKANGALING</h1>
+                <div id="navOptionSection">
+                    <a href="about us.html">SINO KAMI</a>
+                    <div id="auth-toggle-container"></div>
+                </div>
+            </nav>
+        </div>
+
+        <div id="content">
+            
+            <header>
+                <h1>WIKANGALING</h1>
+                <p>Kumusta! at Magandang Araw</p>
+                <h2>GAMIFIED LANGUAGE</h2>
+                <h2 id="learning-platform">LEARNING PLATFORM</h2>
+                <p>Para sa kinabukasan sa mga kabataan</p>
+                <a>GET STARTED</a>
+            </header>
+
+            <aside id="features">
+                <h2>Features of our Website:</h2>
+                <p>Dito sa website saamin meron kaming maraming mga features na pwede magamit ng mga magtuturo para sa pag pagandahin ang kwalidad ng edukasyon ng mga kabataan!</p>
+                <p>So anong hinihintay mo? Gamit na sa site namin!!!</p>
+                <ul>
+                    <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Vero nobis doloremque provident pariatur blanditiis aspernatur saepe alias aut rerum facere corporis dicta a soluta eveniet, ipsum dolor cum illum eius!</li>
+                    <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Architecto ipsam nobis laborum, nesciunt similique itaque illo nam repellat inventore aut eveniet ad rerum adipisci corrupti atque iste? Aspernatur, consectetur incidunt.</li>
+                    <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi repellendus ex labore laboriosam porro facere, blanditiis fugit minima aperiam totam, ab, quidem officia ipsam enim odio iste vel illum earum!</li>
+                </ul>
+                <p>Pumili ka lng sa mga seleksyon namin dito!</p>
+            </aside>
+
+            <div id="cards">
+
+                <div class="card" id="MultipleChoice_Game">
+                    <img src="Miscellanous/Images/MCG.jpg" alt="PICTURE">
+                    <div>
+                        <h3>MULTIPLE CHOICE</h3>
+                        <p>Turuan ang mga bata sa tulong ng mga pagpipilian</p>
+                        <a href="module.html">CREATE</a>                    
+                    </div>
+                </div>
+
+                <div class="card" id="Matching_type_Game/Connect_the_Dots">
+                    <img src="Miscellanous/Images/CTD.jpg" alt="PICTURE">
+                    <div>
+                        <h3>CONNECTER DOTS</h3>
+                        <p>Turuan ang mga bata sa tulong ng mga pagpipilian</p>
+                        <a href="module.html">CREATE</a>
+                    </div>
+                </div>
+
+                <div class="card" id="Sentence_Builder_Game">
+                    <img src="Miscellanous/Images/SB.jpg" alt="PICTURE">
+                    <div>
+                        <h3>SENTENCE BUILDER</h3>
+                        <p>Turuan ang mga bata sa tulong ng mga pagpipilian</p>
+                        <a href="module.html">CREATE</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+    <script>
+        window.addEventListener('load', function() { Highlights(1); });
+    </script>
+    <script src="JS/Navigation JS/SideBar Retraction.js"></script>
+    <script src="JS/Misc JS/Main.js"></script>
+</body>
+</html>

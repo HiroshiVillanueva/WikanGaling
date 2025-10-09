@@ -1,0 +1,164 @@
+/* CSS for whole Section */
+#SideBarMenu {
+    --SideBarWidth: 15em;
+    transition: all ease-out 0.02s;
+
+    justify-content: space-evenly;
+    flex-direction: column;
+    align-items: center;
+
+    position: inherit;
+    display: flex;
+
+    z-index: 98;
+
+    border-right: solid 1px rgb(0, 0, 0);
+    background-color: rgb(255, 255, 255);
+
+    width: var(--SideBarWidth);
+    height: 100vh;
+}
+/* CSS for whole Section */
+
+
+#SideBarMenu hr {
+    width: 85%;
+    z-index: inherit;
+}
+
+
+/* CSS for the protruding button */
+#WidthChanger {
+    transition: all ease-out 0.02s;
+
+    display: flex;
+    position: absolute;
+    align-items: center;
+    justify-content: center;
+
+    transform: translateX(8.25em);
+    background-color: rgb(255, 255, 255);
+
+    z-index: 95;
+    border-right: solid 1px rgb(0, 0, 0);
+    border-top: solid 1px rgb(0, 0, 0);
+    border-bottom: solid 1px rgb(0, 0, 0);
+    border-radius: 0px 50px 50px 0px;
+
+    width: 25px;
+    height: 100px;
+}
+
+#WidthChanger img {
+    cursor: pointer;
+
+    rotate: 180deg;
+    padding: 0 0 0 0;
+    margin: 0 0 0 0em;
+
+    width: 1em;
+    height: auto;
+}
+/* CSS for the protruding button */
+
+/* CSS FOR logo and Page Buttons */
+#imgLogo {
+    background-color: aqua;
+
+    width: 110px;
+    height: 110px;
+
+    padding: 0;
+    margin: 1em 0 0 0;
+
+    border-radius: 50%;
+}
+
+h2 {
+    color: black;
+    font-size: 18px;
+
+    margin: 0.5em 0;
+    padding: 2px 0;
+}
+
+#pageMenu {
+    display: grid;
+    z-index: inherit;
+
+    width: 90%;
+    height: auto;
+
+    padding: 0;
+    margin-top: 2em;
+    margin-bottom: calc(2em - 16px);
+}
+
+
+.PageButtons {
+    position: relative;
+    display: flex;
+
+    padding: 0; 
+    margin: 0.3em auto;
+
+    width: 100%;
+    height: auto;
+    border-radius: 24px;
+
+    text-align: left;
+    align-items: center;
+}
+
+.PageButtons img { 
+    width: 1.5em;
+    height: auto;
+    margin: 0.5em 10% 0.5em 15%; 
+}
+
+.PageButtons:hover {
+    background-color: rgba(179, 181, 192, 0.50);
+    border-radius: 64px;
+    cursor: pointer;
+}
+/* CSS FOR logo and Page Buttons */
+
+
+/* CSS for the Saves Menu */
+#SavesMenu {
+    display: block;
+    z-index: 96;
+
+    width: calc(90% - 3em);
+    height: 40%;
+    padding: 0;
+    margin: 0;
+}
+
+#SavesMenu h3 { 
+    height: min-content; 
+    color: black;
+}
+
+#SavesPage { 
+    display: flex;
+    overflow-y: scroll;
+    flex-direction: column; 
+
+    width: auto;
+    height: 60%;
+}
+/* CSS for the Saves Menu */
+
+
+/* CSS for the bottom-most links */
+#SidebarContext {
+    display: grid;
+    margin: auto 0 1em 0;
+
+    font-size: 12px;
+    text-align: center;
+}
+
+#SidebarContext i { color: rgb(117, 108, 108); }
+/* CSS for the bottom-most links */

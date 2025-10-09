@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WikanGaling</title>
+
+    <link rel="shortcut icon" href="Miscellanous/Images/Logo.svg" type="image/x-icon">
+    <link rel="stylesheet" href="CSS/Standard/ScrollBar.css">
+    <link rel="stylesheet" href="CSS/Standard/body.css">
+    <link rel="stylesheet" href="CSS/Navigation Bars/NavigationBar.css">
+    <link rel="stylesheet" href="CSS/Navigation Bars/SideBar.css">
+    <link rel="stylesheet" href="Miscellanous/Assests/Fonts.css">
+    <link rel="stylesheet" href="css/Standard/aboutUs.css">
+
+    <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.22.5/babel.min.js"></script> 
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script> 
+    <script type="text/babel" src="JS/forms_list_component.js"></script>
+</head>
+<body style="background-image: url(Miscellanous/Images/background.jpg);">
+    <main style="z-index: 2;">
+
+        <div id="Bars">
+            <aside id="SideBarMenu">
+                <img id="imgLogo" src="Miscellanous/Images/Logo.svg" alt="LOGO">
+                <div id="pageMenu">
+                    <div class="PageButtons" id="page_1">
+                        <img src="Miscellanous/Images/home.png" alt="*">
+                        <a id="link_1" href="index.html"><h2>HOME</h2></a>
+                    </div>
+
+                    <div class="PageButtons" id="page_2">
+                        <img src="Miscellanous/Images/writing.png" alt="*">
+                        <a id="link_2" href="module.html"><h2>CREATE</h2></a>
+                    </div>
+
+                    <div class="PageButtons" id="page_3">
+                        <img src="Miscellanous/Images/server.png" alt="*">
+                        <a id="link_3" href="dashboard.html"><h2>DASHBOARD</h2></a>
+                    </div>
+                </div>
+
+                <hr id="sideBarHR">
+
+
+                <div id="SavesMenu">
+                    <h3>SAVES: </h3>
+                    <div id="SavesPage">
+
+                        <div id="forms-list-container"></div>
+
+                    </div>
+                </div>
+
+
+                <div id="SidebarContext">
+                    <a href=""><i>Features</i></a>
+                    <a href="userManual.html"><i>User Manual</i></a>
+                    <a href=""><i>Rights Reserved</i></a>
+                </div>
+
+                <div id="WidthChanger"><img id="ArrowBtn" src="Miscellanous/Images/play.png" alt="Click" onclick="Ext_Rec()"></div>
+            </aside>
+            <nav>
+                <h1>WIKANGALING</h1>
+                <div id="navOptionSection">
+                    <a href="about us.html">SINO KAMI</a>
+                    <div id="auth-toggle-container"></div>
+                </div>
+            </nav>
+        </div>
+
+        <div id="content">
+            <h2 id="title">WIKANGALING</h2>
+            <div id="aboutUsSection">
+                <div id="showcase">
+                    <div class="imageContainer">
+                        <img src="" alt="Hiroshi">
+                        <h2>te</h2>
+                    </div>
+                    <div class="imageContainer">
+                        <img src="" alt="Juliah">
+                        <h2>te</h2>
+                    </div>
+                    <div class="imageContainer">
+                        <img src="" alt="Kent">
+                        <h2>te</h2>
+                    </div>
+                </div>
+
+                <hr>
+
+                <p></p>
+            </div>
+
+        </div>
+    </main>
+    <script src="JS/Navigation JS/SideBar Retraction.js"></script>
+    <script src="JS/Misc JS/Main.js"></script>
+</body>
+</html>

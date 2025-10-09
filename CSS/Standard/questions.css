@@ -1,0 +1,95 @@
+.Question {
+    width: 75%;
+    height: auto;
+
+    background-color: aliceblue;
+    border-radius: 4px;
+    padding: 1em;
+}
+
+.questionnaire-container {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 10px 10px 0px 0px #d0d0c0; /* A playful shadow */
+    padding: 2em;
+    width: 100%;
+    max-width: 800px;
+}
+
+.form-header input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 2em;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+    padding: 0.2em;
+}
+
+.form-title {
+    font-size: 2.5em;
+    color: #5d5d81;
+}
+
+.form-description {
+    font-size: 1.2em;
+    color: #8c8c8c;
+    margin-bottom: 2em;
+}
+
+.question-card {
+    background: #fffafa;
+    border: 2px dashed #ccc; /* Dashed border for a hand-drawn feel */
+    border-radius: 10px;
+    padding: 1.5em;
+    margin-bottom: 1.5em;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.question-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 5px 5px 0px 0px #d0d0c0;
+}
+
+.question-card .question-text {
+    width: 100%;
+    border: none;
+    border-bottom: 1px dashed #aaa;
+    font-size: 1.1em;
+    padding: 0.5em 0;
+    margin-bottom: 1em;
+}
+
+.question-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5em;
+    margin-top: 1em;
+}
+
+.question-actions button {
+    background: #f0e0d0;
+    border: 1px solid #c0b0a0;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    padding: 0.5em 1em;
+}
+
+#add-question-btn {
+    background: #a8d6a8;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 50px;
+    padding: 1em 2em;
+    cursor: pointer;
+    margin-top: 2em;
+    box-shadow: 0 4px 0 #6e9f6e;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+#add-question-btn:active {
+    transform: translateY(4px);
+    box-shadow: none;
+}

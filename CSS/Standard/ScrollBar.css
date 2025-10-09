@@ -1,0 +1,27 @@
+/* Overall scrollbar track */
+::-webkit-scrollbar {
+    width: 4px; /* Width for vertical scrollbar */
+    height: 10px; /* Height for horizontal scrollbar */
+}
+
+/* Scrollbar track (the background of the scrollbar) */
+::-webkit-scrollbar-track {
+    background: #cbcbcb00;
+    border-radius: 5px; /* Rounded corners for the track */
+}
+
+/* Scrollbar thumb (the draggable part) */
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 5px; /* Rounded corners for the thumb */
+}
+
+/* Scrollbar thumb on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #c6c6c6;
+}
+
+/* Corner where scrollbars meet (if both horizontal and vertical are present) */
+::-webkit-scrollbar-corner {
+    background: #eeeeee00;
+}
