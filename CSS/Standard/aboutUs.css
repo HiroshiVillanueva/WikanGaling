@@ -27,8 +27,23 @@
 
 .imageContainer{
     background-color: rgb(57, 44, 18);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
+
+.imageContainer img {
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+    background-color: black;
+    box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.532);
+}
+
 
 #showcase{
     display: flex;
+    justify-content: space-around;
 }
+
+.feature h3, p, em, strong {color: black;}

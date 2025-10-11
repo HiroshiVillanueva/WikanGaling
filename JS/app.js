@@ -35,16 +35,28 @@ const fileSystem = {
     saveUpload: async function(uid, formId, file) {
         if (!file || !uid || !formId) return null;
         
-        const fileExtension = file.name.split('.pop')();
-        const filename = `${formId}/${Date.now()}_${Math.random().toString(36).substr(2, 5)}.${fileExtension}`;
+        // --- START OF MODIFICATION ---
+        // 1. Sanitize the original file name
+        // a. Replace spaces with underscores
+        // b. Use encodeURIComponent to handle special characters (e.g., #, &, %, etc.)
+        const sanitizedFilename = encodeURIComponent(file.name.replace(/\s/g, '_'));
+
+        // 2. Construct the file path using the original, sanitized name
+        // Storage path: [BUCKET]/[uid]/[formId]/[sanitizedFilename]
+        const filename = `${formId}/${sanitizedFilename}`;
+        // --- END OF MODIFICATION ---
         
         try {
-            // Storage path: [BUCKET]/[uid]/[formId]/[filename]
+            // Storage path: [BUCKET]/[uid]/[filename]
             const { error } = await supabase.storage
                 .from(FORMS_BUCKET)
-                .upload(`${uid}/${filename}`, file, {
+                // Use the new filename variable which contains the path: [formId]/[sanitizedFilename]
+                .upload(`${uid}/${filename}`, file, { // <-- Path: [uid]/[formId]/[sanitizedFilename]
                     cacheControl: '3600',
-                    upsert: false
+                    // **CRITICAL CHANGE**: Set upsert to TRUE. 
+                    // This allows overwriting an image if a user imports a new image 
+                    // with the same original filename, which is necessary to replace files.
+                    upsert: true 
                 });
             
             if (error) throw error;
@@ -836,8 +848,8 @@ function App() {
             // 2. Load from Database
             const { data, error } = await supabase
                 .from(FORMS_TABLE)
-                // Select module_id, title, form_data
-                .select('module_id, title, form_data')
+                // Select module_id, title, form_data, and DESCRIPTION
+                .select('module_id, title, description, form_data') // <--- ADDED 'description'
                 // Filter by module_id (was id)
                 .eq('module_id', id)
                 .single();
@@ -870,6 +882,7 @@ function App() {
                     // Use module_id as the primary key in state
                     module_id: data.module_id,
                     title: data.title,
+                    description: data.description || '', // <--- ADDED description with a fallback
                     questions: questionsWithTypes
                 };
                 
@@ -899,8 +912,9 @@ function App() {
         
         const newFormId = crypto.randomUUID(); 
         // Use module_id in the new form structure
-        const newForm = { module_id: newFormId, title: formTitle, questions: [] };
-        
+        // Include description in the new state structure
+        const newForm = { module_id: newFormId, title: formTitle, description: '', questions: [] }; // <--- ADDED description
+
         try {
             const { error } = await supabase
                 .from(FORMS_TABLE)
@@ -909,6 +923,7 @@ function App() {
                     module_id: newFormId,
                     teacher_id: session.user.id, // Renamed from user_id
                     title: formTitle,
+                    description: '', // <--- ADDED description to the database insert
                     form_data: { questions: [] } // Store an empty questions array initially
                 });
             
@@ -936,12 +951,14 @@ function App() {
                 if (formId && latestFormData && session) {
                     try {
                         // Extract properties to be stored at the top level (use module_id instead of id)
-                        const { module_id, title, teacher_id, ...form_data_json } = latestFormData;
+                        // Include description
+                        const { module_id, title, description, teacher_id, ...form_data_json } = latestFormData; // <--- ADDED description to destructuring
 
                         const { error } = await supabase
                             .from(FORMS_TABLE)
                             .update({
                                 title: title,
+                                description: description, // <--- ADDED description to the database update
                                 form_data: form_data_json, // Save the questions, etc.
                             })
                             // Filter by module_id and teacher_id
@@ -1097,6 +1114,7 @@ function App() {
         // Only update the image path; the question text is handled by the onChange handler
         questions[qIndex] = { ...questions[qIndex], image: currentImage };
         setFormDataAndDraft({ ...formData, questions });
+        window.alert('Image has been successfully saved!');
         e.target.reset(); // Clear the file input
     };
     
@@ -1197,6 +1215,7 @@ function App() {
         }
         
         setFormDataAndDraft({ ...formData, questions });
+        window.alert('Image has been successfully saved!');
         e.target.reset();
     };
 
@@ -1215,6 +1234,7 @@ function App() {
             if (option.image) await fileSystem.deleteUpload(option.image);
             questions[qIndex].options[oIndex].image = await fileSystem.saveUpload(session.user.id, formId, newFile);
             setFormDataAndDraft({ ...formData, questions });
+            window.alert('Image has been successfully saved!');
         } else if (newFile) {
             setError('Must be logged in and editing a form to upload images.');
         }
@@ -1339,20 +1359,51 @@ function App() {
                     {/* NEW DIV WRAPPING TITLE INPUT AND BUTTONS */}
                     <div id="formEditingHeader">
                         {/* Title Input */}
-                        <input 
-                            key={formId}
-                            type="text" 
-                            name="form_title" 
-                            placeholder="Questionnaire Name Here" 
-                            defaultValue={formData.title} 
-                            required 
-                            onBlur={(e) => {
-                                const newTitle = e.target.value.trim();
-                                if (newTitle && newTitle !== formData.title) {
-                                    setFormDataAndDraft({ ...formData, title: newTitle });
-                                }
-                            }}
-                        />
+                        <div>
+                            <input 
+                                key={formId}
+                                style={{ 
+                                    margin: '10px 0px', 
+                                }} 
+                                type="text" 
+                                name="form_title" 
+                                placeholder="Questionnaire Name Here" 
+                                defaultValue={formData.title} 
+                                required 
+                                onBlur={(e) => {
+                                    const newTitle = e.target.value.trim();
+                                    if (newTitle && newTitle !== formData.title) {
+                                        setFormDataAndDraft({ ...formData, title: newTitle });
+                                    }
+                                }}
+                            />
+
+                            {/* --- NEW DESCRIPTION TEXTAREA --- */}
+                            <textarea 
+                                key={`desc-${formId}`} // Key for controlled reset on form switch
+                                name="form_description" 
+                                placeholder="A brief description for your module (optional)" 
+                                rows="3"
+                                defaultValue={formData.description} 
+                                style={{ 
+                                    width: '100%', 
+                                    padding: '10px', 
+                                    margin: '10px 0', 
+                                    boxSizing: 'border-box',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '4px'
+                                }} 
+                                onBlur={(e) => {
+                                    // Update description state on blur
+                                    const newDescription = e.target.value.trim();
+                                    // Only update state if the description has changed
+                                    if (newDescription !== formData.description) {
+                                        setFormDataAndDraft({ ...formData, description: newDescription });
+                                    }
+                                }}
+                            />
+                            {/* --- END NEW DESCRIPTION TEXTAREA --- */}
+                        </div>
 
                         <div>
                             {/* Renamed button to Save Draft and added handlePublishModule */}

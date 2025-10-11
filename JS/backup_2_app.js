@@ -10,13 +10,21 @@ const SUPABASE_URL = "https://aliyyqinorqlwmjhbqza.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsaXl5cWlub3JxbHdtamhicXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxMDY2OTgsImV4cCI6MjA3NDY4MjY5OH0.wqmf23uvtil0BJ0qlk8qm_Wq7LsaD1ClZKwnDr1OxME"; 
 
 // Initialize Supabase Client
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); 
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+        // 🛑 CRITICAL FIX: Stops the Supabase client from forcing a full page reload on token refresh (tab focus).
+        reloadOnAuthChange: false,
+    }
+}); 
 
 // --- Constants ---
-const FORMS_TABLE = 'forms_metadata';
+const FORMS_TABLE = 'module';
 const FORMS_BUCKET = 'form_images'; 
 // Global cache for image URLs to prevent redundant Supabase calls
 const imageUrlCache = {};
+// Student-side application URL base
+const STUDENT_APP_URL_BASE = "https://wikan-galing-student-side.vercel.app/?form_id="; 
+
 
 // =================================================================
 // 2. HELPER FUNCTIONS (Outside of App component)
@@ -27,7 +35,7 @@ const fileSystem = {
     saveUpload: async function(uid, formId, file) {
         if (!file || !uid || !formId) return null;
         
-        const fileExtension = file.name.split('.').pop();
+        const fileExtension = file.name.split('.pop')();
         const filename = `${formId}/${Date.now()}_${Math.random().toString(36).substr(2, 5)}.${fileExtension}`;
         
         try {
@@ -88,31 +96,122 @@ const fileSystem = {
     }
 };
 
+/**
+ * Extracts the clean filename from the Supabase storage path.
+ */
+const getFilenameFromPath = (filePath) => {
+    if (!filePath) return 'No file chosen';
+    const parts = filePath.split('/');
+    // Filename is the last part
+    return parts[parts.length - 1];
+};
+
+
 // =================================================================
 // 3. REACT COMPONENTS
 // =================================================================
 
-/** Component to display an image fetched from Supabase Storage. */
-function StorageImage({ filePath }) {
-    const [url, setUrl] = React.useState('');
-    
-    React.useEffect(() => {
-        let isMounted = true;
-        if (filePath) {
-            // Fetch URL using the caching helper
-            fileSystem.getDownloadURL(filePath).then(fetchedUrl => {
-                if (isMounted) setUrl(fetchedUrl);
-            });
-        } else {
-            setUrl('');
-        }
-        return () => { isMounted = false; }; // Cleanup function
-    }, [filePath]);
+/** Component for displaying the custom non-blocking notification/modal. */
+function NotificationModal({ message, isLink, onClose }) {
+    const link = isLink ? `${STUDENT_APP_URL_BASE}${message}` : null;
 
-    if (!url) return null;
-
-    return <img src={url} alt="Question Image" className="image-preview" />;
+    return (
+        <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000,
+        }}>
+            <div style={{
+                backgroundColor: 'white',
+                padding: '30px',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+                maxWidth: '400px',
+                width: '90%',
+                textAlign: 'center',
+            }}>
+                <h3 style={{ borderBottom: '2px solid #009DFF', paddingBottom: '10px', marginBottom: '20px', color: '#009DFF' }}>
+                    {isLink ? 'Module Published!' : 'Notification'}
+                </h3>
+                
+                {isLink ? (
+                    <>
+                        <p style={{ marginBottom: '10px' }}>
+                            Your module is now published. Share this link with students:
+                        </p>
+                        <a 
+                            href={link} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            style={{ 
+                                display: 'block', 
+                                wordBreak: 'break-all', 
+                                padding: '10px', 
+                                backgroundColor: '#f0f0f0', 
+                                borderRadius: '4px',
+                                textDecoration: 'none',
+                                color: '#333'
+                            }}
+                        >
+                            {link}
+                        </a>
+                        <button
+                            onClick={() => {
+                                // Logic to copy link to clipboard (using non-navigator method for iFrame compatibility)
+                                const tempInput = document.createElement("input");
+                                tempInput.value = link;
+                                document.body.appendChild(tempInput);
+                                tempInput.select();
+                                document.execCommand("copy");
+                                document.body.removeChild(tempInput);
+                                alert("Link copied to clipboard!"); // Use a temporary native alert for copy success
+                                onClose();
+                            }}
+                            style={{
+                                marginTop: '20px',
+                                backgroundColor: '#009DFF',
+                                color: 'white',
+                                padding: '10px 15px',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            Copy Link & Close
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        <p>{message}</p>
+                        <button 
+                            onClick={onClose}
+                            style={{
+                                marginTop: '20px',
+                                backgroundColor: '#FF5255',
+                                color: 'white',
+                                padding: '10px 15px',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            Close
+                        </button>
+                    </>
+                )}
+                
+            </div>
+        </div>
+    );
 }
+
 
 /** Component for selecting the question type. */
 function QuestionTypeSelector({ currentType, qIndex, onTypeChange }) {
@@ -123,18 +222,17 @@ function QuestionTypeSelector({ currentType, qIndex, onTypeChange }) {
     ];
 
     return (
-        <div className="question-type-selector" style={{ padding: '10px 0', borderTop: '1px solid #ddd', marginTop: '10px' }}>
-            <strong>Question Type:</strong>
+        <div className="question-type-selector">
             {types.map((type) => (
-                <button
+                <button // Question Type Selector Button
                     key={type.key}
                     onClick={() => onTypeChange(qIndex, type.key)}
                     style={{ 
-                        margin: '0 5px', 
-                        padding: '5px 10px',
-                        backgroundColor: currentType === type.key ? '#007bff' : '#f0f0f0',
+                        margin: '0 1em', 
+                        padding: '0 1.5em',
+                        backgroundColor: currentType === type.key ? '#009DFF' : '#81C5EF',
                         color: currentType === type.key ? 'white' : 'black',
-                        border: '1px solid #ccc',
+                        border: '1px solid #cccccc01',
                         borderRadius: '4px',
                         cursor: 'pointer'
                     }}
@@ -142,6 +240,401 @@ function QuestionTypeSelector({ currentType, qIndex, onTypeChange }) {
                     {type.label}
                 </button>
             ))}
+        </div>
+    );
+}
+
+// =================================================================
+// 3A. COMPONENT ABSTRACTION: Question Text/Image Editor
+// =================================================================
+
+function QuestionTextAndImageForm({ question, qIndex, onUpdateItemText, onUpdateQuestion }) {
+    const filename = getFilenameFromPath(question.image);
+    const uniqueId = `question_image_${qIndex}`;
+
+    return (
+        <form class="questionHeader" onSubmit={(e) => onUpdateQuestion(e, qIndex)} encType="multipart/form-data">
+            
+            {/* Conditional if-else statement to determine Question Text Input */}
+            {question.type === 'fill_in_blanks' ? (
+                <textarea // Use textarea for Fill in the Blanks for longer text
+                    name="question_text" 
+                    value={question.text} 
+                    required 
+                    rows="5"
+                    placeholder="Enter the entire paragraph text here. Mark blanks with [BLANK] or by typing the correct answer in brackets."
+                    onChange={(e) => onUpdateItemText(qIndex, undefined, e.target.value)}
+                />
+            ) : (
+                <input // Use single-line input for other types
+                    type="text" 
+                    name="question_text" 
+                    placeholder="Text Here" 
+                    value={question.text} 
+                    required 
+                    onChange={(e) => onUpdateItemText(qIndex, undefined, e.target.value)}
+                />
+            )}
+            
+            {/* Only allow question image upload for multiple choice */}
+            {question.type === 'multiple_choice' && (
+                <> {/* Fragment for grouping elements */}                   
+                    {/* --- START OF CUSTOM FILE INPUT DISPLAY --- */}
+                    <div class="questionImagePackage">
+                        <label htmlFor={uniqueId} 
+                        class="optionImage"
+                        style={{ 
+                            margin: '0 1em',
+                            cursor: 'pointer',
+                            fontSize: 'small'
+                        }}>
+                            {filename}
+                            {/* Hidden actual file input */}
+                            <input
+                                type="file" 
+                                name="question_image" 
+                                id={uniqueId} 
+                                accept="image/*" 
+                                style={{
+                                    position: 'absolute',
+                                    width: '1px',
+                                    height: '1px',
+                                    padding: '0',
+                                    margin: '-1px',
+                                    overflow: 'hidden',
+                                    clip: 'rect(0, 0, 0, 0)',
+                                    border: '0',
+                                }}
+                            />
+                        </label>
+                        {/* --- END OF CUSTOM FILE INPUT DISPLAY --- */}
+                        <button class="questionImageButton" type="submit">Import Image</button>
+                    </div>
+                </>
+            )}
+        </form>
+    );
+}
+
+
+// =================================================================
+// 3B. COMPONENT ABSTRACTION: Multiple Choice / Fill-in-the-Blank Options Editor
+// =================================================================
+
+function MultipleChoiceOptions({
+    question, qIndex, onUpdateItemText, onUpdateOption, onRemoveOption, onSetCorrect, 
+    handleAddMultipleChoiceOption, handleAddFillInTheBlankOption
+}) {
+    const isMultipleChoice = question.type === 'multiple_choice';
+    const isFillInTheBlank = question.type === 'fill_in_blanks';
+    // Choose the correct handler based on the question type
+    const handleAddOption = isMultipleChoice ? handleAddMultipleChoiceOption : handleAddFillInTheBlankOption;
+
+    return (
+        <>  <div class="optionBackground">       
+                {question.options.length === 0 ? (
+                    <p style={{marginLeft: '8px'}}>No options yet. Add one below.</p>
+                ) : (
+                    <ul>
+                        {question.options.map((option, oIndex) => {
+                            const uniqueId = `option_image_${qIndex}_${oIndex}`;
+                            const filename = getFilenameFromPath(option.image);
+
+                            return (
+                                <li key={oIndex} className="option">
+                                    <div class="valueOptionGroup">
+                                        {/* --- BUTTONS MOVED BEFORE INPUT (Previous change) --- */}
+                                        <button style={{ backgroundColor: '#FF5255' }}  onClick={() => onRemoveOption(qIndex, oIndex)}>REMOVE</button>
+                                        {question.correct === oIndex ? (
+                                            <button class="setCorrect">SET</button>
+                                        ) : (
+                                            <button onClick={() => onSetCorrect(qIndex, oIndex)}>SET</button>
+                                        )}
+                                        {/* --- END BUTTONS --- */}
+                                        
+                                        {/* Option Text Input (Controlled Component) */}
+                                        <input 
+                                            type="text" 
+                                            name="option_text" 
+                                            placeholder="Text Here" 
+                                            value={option.text} 
+                                            style={{ width: '200px' }} 
+                                            onChange={(e) => onUpdateItemText(qIndex, oIndex, e.target.value)}
+                                        />
+                                    </div>
+                                    {/* Option Image: Only for Multiple Choice */}
+                                    {isMultipleChoice && (
+                                        <form class="optionImageGroup" style={{ display: 'inline-block', margin: '0 10px' }} onSubmit={(e) => onUpdateOption(e, qIndex, oIndex)} encType="multipart/form-data">
+                                            
+                                            {/* --- START OF CUSTOM FILE INPUT DISPLAY --- */}
+                                            <label htmlFor={uniqueId}
+                                            class="optionImage"
+                                            style={{ 
+                                                margin: '0 1em',
+                                                cursor: 'pointer',
+                                                fontSize: 'small'
+                                            }}>
+                                                {filename}
+                                                {/* Hidden actual file input */}
+                                                <input 
+                                                    type="file" 
+                                                    name="option_image" 
+                                                    id={uniqueId}
+                                                    accept="image/*" 
+                                                    onChange={(e) => e.target.form.requestSubmit()} 
+                                                    style={{
+                                                        position: 'absolute',
+                                                        padding: '0',
+                                                        margin: '-1px',
+                                                        overflow: 'hidden',
+                                                        clip: 'rect(0, 0, 0, 0)',
+                                                    }}
+                                                />
+                                            </label>
+                                            {/* --- END OF CUSTOM FILE INPUT DISPLAY --- */}
+
+                                            <button type="submit">Import Image</button>
+                                        </form>
+                                    )}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                )}
+
+                {/* Add Option Form */}
+                <form 
+                    class="addOptiongroup"
+                    onSubmit={(e) => handleAddOption(e, qIndex)} 
+                    encType={isMultipleChoice ? "multipart/form-data" : "application/x-www-form-urlencoded"}
+                >
+                    <div>
+                        <button type="submit">SAVE</button>
+                        <input type="text" name="option_text" placeholder="New option text" required />
+                    </div>
+                    
+                    {/* Option Image: Only for Multiple Choice (Normal file input for ADD) */}
+                    {isMultipleChoice && (
+                        <>
+                            <input type="file" name="option_image" id={`option_image_add_${qIndex}`} accept="image/*" />
+                        </>
+                    )}
+                </form>
+            </div>   
+        </>
+    );
+}
+
+// =================================================================
+// 3C. COMPONENT ABSTRACTION: Connecting Dots Options Editor
+// =================================================================
+
+function ConnectingDotsOptions({ question, qIndex, onUpdateItemText, onUpdateCDOptionImage, onRemoveOption, handleAddConnectingDotPair }) {
+    
+    // 1. Logic to group options into pairs
+    const pairs = [];
+    const processedIds = new Set();
+
+    question.options.forEach((optionA, indexA) => {
+        if (!processedIds.has(optionA.id)) {
+            // Find its match
+            const optionB = question.options.find(o => o.id === optionA.matchId);
+            const indexB = question.options.findIndex(o => o.id === optionA.matchId);
+
+            if (optionB) {
+                // Store the pair, ensuring a consistent order (e.g., by original index)
+                // This is the core data structure for rendering
+                pairs.push({
+                    a: { ...optionA, originalIndex: indexA },
+                    b: { ...optionB, originalIndex: indexB }
+                });
+
+                // Mark both as processed
+                processedIds.add(optionA.id);
+                processedIds.add(optionB.id);
+            }
+        }
+    });
+
+    // Helper function to render the editor for one side of the pair (Column 1 or 2)
+    const renderOptionEditor = (option) => {
+        const uniqueId = `cd_option_image_${qIndex}_${option.originalIndex}`;
+        const filename = getFilenameFromPath(option.image);
+
+        return (
+            <div style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '10px', flex: '1 1 45%', minWidth: '300px' }}>
+                <form onSubmit={(e) => onUpdateCDOptionImage(e, qIndex, option.originalIndex)} encType="multipart/form-data">
+                    {/* Text Input (Handled by onChange, not form submit) */}
+                    <input 
+                        type="text" 
+                        value={option.text} 
+                        placeholder="Text Here" 
+                        style={{ width: '150px', marginRight: '5px' }} 
+                        onChange={(e) => onUpdateItemText(qIndex, option.originalIndex, e.target.value)}
+                    />
+                    
+                    <div>
+                        {/* --- START OF CUSTOM FILE INPUT DISPLAY --- */}
+                        <label htmlFor={uniqueId} 
+                        className="optionImage"
+                        style={{ 
+                            margin: '0 1em',
+                            cursor: 'pointer',
+                            fontSize: 'small'
+                        }}>
+                            {filename}
+                            {/* Hidden actual file input */}
+                            <input 
+                                type="file" 
+                                name="option_image" 
+                                id={uniqueId}
+                                accept="image/*" 
+                                onChange={(e) => e.target.form.requestSubmit()} 
+                                style={{
+                                    position: 'absolute',
+                                    margin: '-1px',
+                                    overflow: 'hidden',
+                                    clip: 'rect(0, 0, 0, 0)',
+                                }}
+                            />
+                        </label>
+                        {/* --- END OF CUSTOM FILE INPUT DISPLAY --- */}
+
+                        <button class="questionImageButtonConnecterDots" type="submit">Import Image</button>
+                    </div>
+                </form>
+            </div>
+        );
+    };
+
+    return (
+        <>
+            <div class="connectingPairOptionBackground">
+                {pairs.length === 0 ? (
+                    <p style={{marginLeft: '8px'}}>No pairs yet. Add a new pair below.</p>
+                ) : (
+                    <ul>
+                        {pairs.map((pair) => {
+                            // Use the original index of option A for the removal handler
+                            const removeIndex = pair.a.originalIndex; 
+
+                            return (
+                                // Main list item for the PAIR
+                                <li key={pair.a.id} className="pair" style={{ padding: '15px', marginBottom: '15px', borderRadius: '5px' }}>
+                                   
+                                    <div style={{textAlign: 'right' }}>
+                                        <button 
+                                            onClick={() => onRemoveOption(qIndex, removeIndex)} 
+                                            class="removePair"
+                                            style={{ backgroundColor: '#FF5255'}}
+                                        >
+                                            REMOVE
+                                        </button>
+                                    </div>
+
+                                    {/* Container for the two columns */}
+                                    <div style={{ display: 'grid', justifyContent: '', flexWrap: 'wrap', flexGrow: '1' }}>
+                                        {renderOptionEditor(pair.a)}
+                                        {renderOptionEditor(pair.b)}
+                                    </div>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                )}
+                
+                {/* Add Pair Form with Images */}
+                <form class="addOptionConnectingDots" onSubmit={(e) => handleAddConnectingDotPair(e, qIndex)} encType="multipart/form-data">
+                    <button type="submit">Add Pair</button>
+                    <div class="addQuestionPair">  
+                        <div style={{ margin: '10px' }}>
+                            <input type="text" name="text1" placeholder="Item for first Column" required style={{ display: 'block'}}/>
+                            <input type="file" name="file1" accept="image/*" />
+                        </div>
+                        <div style={{ margin: '10px' }}>
+                            <input type="text" name="text2" placeholder="Item for second Column" required style={{ display: 'block'}}/>
+                            <input type="file" name="file2" accept="image/*" />
+                        </div>
+                    </div> 
+                </form>
+            </div>
+        </>
+    );
+}
+
+// =================================================================
+// 3D. COMPONENT ABSTRACTION: Question Editor Wrapper
+// =================================================================
+
+function QuestionEditor({
+    question, qIndex, 
+    onUpdateItemText, onUpdateQuestion, onRemoveQuestion, onUpdateQuestionType, onRemoveOption,
+    // MC/FITB Handlers
+    handleAddMultipleChoiceOption, handleAddFillInTheBlankOption, handleUpdateOption, handleSetCorrect, 
+    // CD Handlers
+    handleAddConnectingDotPair, onUpdateCDOptionImage
+}) {
+    
+    // Prepare props for the Multiple Choice/FITB Options component
+    const mcFitbProps = {
+        question, qIndex, onUpdateItemText, onRemoveOption,
+        onUpdateOption: handleUpdateOption,
+        onSetCorrect: handleSetCorrect,
+        handleAddMultipleChoiceOption, 
+        handleAddFillInTheBlankOption 
+    };
+
+    // Prepare props for the Connecting Dots Options component
+    const cdProps = {
+        question, qIndex, onUpdateItemText, onRemoveOption,
+        onUpdateCDOptionImage,
+        handleAddConnectingDotPair 
+    };
+
+    return (
+        <div className="question" style={{ border: '1px solid #ccc', padding: '15px', marginBottom: '20px' }}>
+            
+            {/* START: Grouping the Question Form and Remove Button with flex layout */}
+            <div style={{ 
+                display: 'flex', 
+                alignItems: 'flex-start', 
+                gap: '20px', 
+                marginBottom: '10px',
+                // Ensures the content can wrap if the screen is too narrow
+                flexWrap: 'wrap' 
+            }}>
+                
+                {/* 1. Question Text and Image Form (Wrapped to allow flex growth) */}
+                <div style={{ flexGrow: 1, minWidth: '300px' }}> 
+                    <QuestionTextAndImageForm 
+                        question={question}
+                        qIndex={qIndex}
+                        onUpdateItemText={onUpdateItemText}
+                        onUpdateQuestion={onUpdateQuestion}
+                    />
+                </div>
+
+                {/* 2. Remove Question Button */}
+                <button onClick={() => onRemoveQuestion(qIndex)} class="removeQuestion" style={{ flexShrink: 0 }}>
+                    X
+                </button>
+            
+            </div>
+            {/* END: Grouping the Question Form and Remove Button */}
+
+            {/* 2. Render the specific Options Editor based on type */}
+            {question.type === 'multiple_choice' || question.type === 'fill_in_blanks' ? (
+                <MultipleChoiceOptions {...mcFitbProps} />
+            ) : question.type === 'connecting_dots' ? (
+                <ConnectingDotsOptions {...cdProps} />
+            ) : null}
+            
+            {/* 3. The Type Selector */}
+            <QuestionTypeSelector 
+                currentType={question.type} 
+                qIndex={qIndex} 
+                onTypeChange={onUpdateQuestionType} 
+            />
         </div>
     );
 }
@@ -164,24 +657,33 @@ function App() {
     
     const [error, setError] = React.useState('');
     const [success, setSuccess] = React.useState('');
+    
+    // NEW STATE: For the custom notification modal
+    const [notification, setNotification] = React.useState({ show: false, message: '', isLink: false });
+
 
     // --- State & Draft Helpers ---
     /** Updates the main formData state and saves the current state to local storage as a draft. */
     const setFormDataAndDraft = (newFormData) => {
         setFormData(newFormData);
-        if (newFormData && newFormData.id && Object.keys(newFormData).length > 0) {
-            localStorage.setItem(`form_data_draft_${newFormData.id}`, JSON.stringify(newFormData));
+        // Use module_id for local storage keying
+        if (newFormData && newFormData.module_id && Object.keys(newFormData).length > 0) {
+            localStorage.setItem(`form_data_draft_${newFormData.module_id}`, JSON.stringify(newFormData));
         }
     };
 
     /** Handles text changes for both question text and option text (Controlled Component Logic). */
     const handleUpdateItemText = (qIndex, oIndex, newText) => {
         setFormDataAndDraft(prevFormData => {
-            const newQuestions = [...prevFormData.questions];
+            const newQuestions = [...(prevFormData.questions || [])];
             
+            if (!newQuestions[qIndex]) return prevFormData;
+
             if (oIndex !== undefined) {
                 // Update Option Text (if oIndex is provided)
-                newQuestions[qIndex].options[oIndex].text = newText;
+                if (newQuestions[qIndex].options && newQuestions[qIndex].options[oIndex]) {
+                    newQuestions[qIndex].options[oIndex].text = newText;
+                }
             } else {
                 // Update Question Text
                 newQuestions[qIndex].text = newText;
@@ -195,35 +697,32 @@ function App() {
     /** Handles changing the question type. */
     const handleUpdateQuestionType = (qIndex, newType) => {
         setFormDataAndDraft(prevFormData => {
-            const newQuestions = [...prevFormData.questions];
-            
-            // Only update the type if it's new
-            if (newQuestions[qIndex].type !== newType) {
-                
-                // --- Reset Options and Cleanup Images for Old Type ---
-                const oldType = newQuestions[qIndex].type;
-                if (oldType === 'multiple_choice') {
-                     // Delete images associated with options before resetting options array
-                    for (const option of newQuestions[qIndex].options) {
-                        if (option.image) {
-                            fileSystem.deleteUpload(option.image);
-                        }
+            const newQuestions = [...(prevFormData.questions || [])];
+            if (!newQuestions[qIndex] || newQuestions[qIndex].type === newType) return prevFormData;
+
+            // --- Reset Options and Cleanup Images for Old Type ---
+            const oldType = newQuestions[qIndex].type;
+            if (oldType === 'multiple_choice' || oldType === 'connecting_dots') {
+                 // Delete images associated with options before resetting options array
+                for (const option of newQuestions[qIndex].options || []) {
+                    if (option.image) {
+                        fileSystem.deleteUpload(option.image);
                     }
                 }
-                
-                // Reset common properties and set defaults for new type
-                newQuestions[qIndex].options = [];
-                // Only relevant for multiple_choice and fill_in_blanks
-                newQuestions[qIndex].correct = (newType === 'multiple_choice' || newType === 'fill_in_blanks') ? -1 : undefined; 
-
-                // Ensure question image is removed if switching from MC to a type that doesn't support it
-                if (newType !== 'multiple_choice' && newQuestions[qIndex].image) {
-                    fileSystem.deleteUpload(newQuestions[qIndex].image);
-                    newQuestions[qIndex].image = null;
-                }
-
-                newQuestions[qIndex].type = newType;
             }
+            
+            // Reset common properties and set defaults for new type
+            newQuestions[qIndex].options = [];
+            // Only relevant for multiple_choice and fill_in_blanks
+            newQuestions[qIndex].correct = (newType === 'multiple_choice' || newType === 'fill_in_blanks') ? -1 : undefined; 
+
+            // Ensure question image is removed if switching from MC to a type that doesn't support it
+            if (newType !== 'multiple_choice' && newQuestions[qIndex].image) {
+                fileSystem.deleteUpload(newQuestions[qIndex].image);
+                newQuestions[qIndex].image = null;
+            }
+
+            newQuestions[qIndex].type = newType;
             
             return { ...prevFormData, questions: newQuestions };
         });
@@ -284,7 +783,8 @@ function App() {
         if (formId && session) {
 
             // Clear previous form data immediately for a clean slate
-            if (formData.id) {
+            // Check against module_id instead of id
+            if (formData.module_id && formData.module_id !== formId) {
                 setFormData({}); 
             }
 
@@ -303,21 +803,53 @@ function App() {
     const loadForm = async (id) => {
         setError('');
         try {
+            // 1. Check local draft first
+            const draftKey = `form_data_draft_${id}`;
+            const draft = localStorage.getItem(draftKey);
+            
+            if (draft) {
+                try {
+                    const parsedDraft = JSON.parse(draft);
+                    
+                    // Add cleanup/default logic for older drafts
+                    const questionsWithTypes = (parsedDraft.questions || []).map(q => {
+                        const type = q.type || 'multiple_choice';
+                        const correct = (type === 'multiple_choice' || type === 'fill_in_blanks') ? (q.correct === undefined ? -1 : q.correct) : undefined;
+                        let options = q.options || [];
+                        if (type === 'fill_in_blanks') {
+                            options = options.map(o => ({ text: o.text }));
+                        }
+                        return { ...q, type, correct, options };
+                    });
+                    
+                    // Ensure the primary key in state is 'module_id'
+                    setFormDataAndDraft({ ...parsedDraft, module_id: id, questions: questionsWithTypes });
+                    setSuccess('Loaded local draft.');
+                    return;
+
+                } catch (e) {
+                    console.error("Error parsing local draft:", e);
+                    localStorage.removeItem(draftKey); // Clear bad draft
+                }
+            }
+            
+            // 2. Load from Database
             const { data, error } = await supabase
                 .from(FORMS_TABLE)
-                .select('id, title, form_data')
-                .eq('id', id)
+                // Select module_id, title, form_data, and DESCRIPTION
+                .select('module_id, title, description, form_data') // <--- ADDED 'description'
+                // Filter by module_id (was id)
+                .eq('module_id', id)
                 .single();
 
             if (error) throw error;
             if (data) {
                 // Ensure form_data has a 'type' property, defaulting to multiple_choice and handling correct/image cleanup
-                const questionsWithTypes = data.form_data.questions.map(q => {
+                const questionsWithTypes = (data.form_data.questions || []).map(q => {
                     const type = q.type || 'multiple_choice';
                     // Ensure correct property exists if it's a selectable type
                     const correct = (type === 'multiple_choice' || type === 'fill_in_blanks') ? (q.correct === undefined ? -1 : q.correct) : undefined;
                     
-                    // Clean up properties not relevant to the new type logic if necessary (Deep cleanup happens on type change, but this protects against old DB structure)
                     let options = q.options || [];
 
                     if (type === 'fill_in_blanks') {
@@ -335,11 +867,16 @@ function App() {
 
                 const loadedFormData = {
                     ...data.form_data,
+                    // Use module_id as the primary key in state
+                    module_id: data.module_id,
+                    title: data.title,
+                    description: data.description || '', // <--- ADDED description with a fallback
                     questions: questionsWithTypes
                 };
                 
-                setFormData(loadedFormData);
+                setFormDataAndDraft(loadedFormData);
                 setSuccess('Form loaded from Supabase Database!');
+                // Remove draft now that database version is loaded
                 localStorage.removeItem(`form_data_draft_${id}`); 
             } else {
                 throw new Error('Form not found.');
@@ -347,7 +884,8 @@ function App() {
         } catch (err) {
             setError('Error loading form: ' + err.message);
             // Fallback to empty form structure if load fails
-            setFormDataAndDraft({ id: id, title: 'Untitled Form', questions: [] });
+            // Use module_id for the ID in the fallback structure
+            setFormDataAndDraft({ module_id: id, title: 'Untitled Form', questions: [] });
         }
     };
 
@@ -361,16 +899,20 @@ function App() {
         }
         
         const newFormId = crypto.randomUUID(); 
-        const newForm = { id: newFormId, title: formTitle, questions: [] };
-        
+        // Use module_id in the new form structure
+        // Include description in the new state structure
+        const newForm = { module_id: newFormId, title: formTitle, description: '', questions: [] }; // <--- ADDED description
+
         try {
             const { error } = await supabase
                 .from(FORMS_TABLE)
                 .insert({
-                    id: newFormId,
-                    user_id: session.user.id,
+                    // Use module_id and teacher_id
+                    module_id: newFormId,
+                    teacher_id: session.user.id, // Renamed from user_id
                     title: formTitle,
-                    form_data: newForm
+                    description: '', // <--- ADDED description to the database insert
+                    form_data: { questions: [] } // Store an empty questions array initially
                 });
             
             if (error) throw error;
@@ -387,53 +929,83 @@ function App() {
         }
     };
 
-    /** Saves all current form data and triggers a full page refresh. */
+    /** Saves all current form data. */
     const handleSaveForm = async () => {
         // Use a 50ms timeout to ensure React state updates (from inputs) finalize
-        setTimeout(async () => { 
-            const latestFormData = formData; 
-            
-            if (formId && latestFormData && session) {
-                try {
-                    const { error } = await supabase
-                        .from(FORMS_TABLE)
-                        .update({
-                            title: latestFormData.title,
-                            form_data: latestFormData // Save the full JSON object
-                        })
-                        .eq('id', formId)
-                        .select();
+        return new Promise((resolve) => {
+            setTimeout(async () => { 
+                const latestFormData = formData; 
+                
+                if (formId && latestFormData && session) {
+                    try {
+                        // Extract properties to be stored at the top level (use module_id instead of id)
+                        // Include description
+                        const { module_id, title, description, teacher_id, ...form_data_json } = latestFormData; // <--- ADDED description to destructuring
 
-                    if (error) throw error;
-                    
-                    localStorage.removeItem(`form_data_draft_${formId}`);
-                    
-                    setSuccess('Form saved successfully to Supabase Database!');
-                    
-                    // Force a full page refresh to reload data cleanly from the database
-                    window.location.reload(); 
-                    
-                } catch (err) {
-                    setError('Error saving form: ' + err.message);
+                        const { error } = await supabase
+                            .from(FORMS_TABLE)
+                            .update({
+                                title: title,
+                                description: description, // <--- ADDED description to the database update
+                                form_data: form_data_json, // Save the questions, etc.
+                            })
+                            // Filter by module_id and teacher_id
+                            .eq('module_id', module_id || formId)
+                            .eq('teacher_id', session.user.id) // Renamed from user_id
+                            .select();
+
+                        if (error) throw error;
+                        
+                        localStorage.removeItem(`form_data_draft_${formId}`);
+                        
+                        setSuccess('Form saved successfully to Supabase Database!');
+                        resolve(true); // Resolve the promise successfully
+                        
+                    } catch (err) {
+                        setError('Error saving form: ' + err.message);
+                        resolve(false); // Resolve the promise with failure
+                    }
+                } else {
+                    resolve(false); // Resolve with failure if conditions aren't met
                 }
-            }
-        }, 50); 
+            }, 50);
+        });
+    };
+    
+    /** NEW HANDLER: Saves the form and displays the public link. */
+    const handlePublishModule = async () => {
+        const success = await handleSaveForm(); // Wait for the save operation to complete
+
+        if (success && formId) {
+            setNotification({
+                show: true,
+                message: formId, // Pass the formId as the message for link construction
+                isLink: true 
+            });
+        } else if (!formId) {
+            setError("Cannot publish: Please create or load a form first.");
+        }
     };
 
     /** Deletes the form entry, including all associated files in storage. */
     const handleDeleteForm = async () => {
-        if (window.confirm('Are you sure you want to delete this form and all images?')) {
+        // Using custom modal instead of window.confirm for consistency, but reusing the window.confirm 
+        // prompt since we cannot generate a new component for a simple delete confirmation.
+        if (window.confirm('Are you sure you want to delete this form and all images?')) { 
             if (formId && session) {
                 try {
                     // 1. Delete all associated images from Storage
+                    // Note: Supabase Storage paths are typically bucket/folder/file. Here, the 'folder' is constructed as [user_id]/[formId].
                     const { data: listData } = await supabase.storage
                         .from(FORMS_BUCKET)
-                        // List files under the user's ID that contain the formId in the path
-                        .list(session.user.id, { search: formId, limit: 100 }); 
+                        // List files under the teacher's ID directory (was user_id)
+                        .list(`${session.user.id}/${formId}`, { limit: 100 }); 
 
-                    if (listData) {
-                        const filesToDelete = listData.map(file => `${session.user.id}/${file.name}`);
+                    if (listData && listData.length > 0) {
+                        // Files are listed with their name relative to the path, so we rebuild the full path
+                        const filesToDelete = listData.map(file => `${session.user.id}/${formId}/${file.name}`);
                         if (filesToDelete.length > 0) {
+                            // The .remove method expects full paths from the bucket root
                             await supabase.storage.from(FORMS_BUCKET).remove(filesToDelete);
                         }
                     }
@@ -442,11 +1014,14 @@ function App() {
                     const { error: dbError } = await supabase
                         .from(FORMS_TABLE)
                         .delete()
-                        .eq('id', formId);
+                        // Filter by module_id and teacher_id
+                        .eq('module_id', formId)
+                        .eq('teacher_id', session.user.id); // Ensure user owns the form (was user_id)
                     
                     if (dbError) throw dbError;
 
                     // 3. Clean up local state
+                    localStorage.removeItem(`form_data_draft_${formId}`);
                     setFormId('');
                     setFormData({});
                     setSuccess('Form and all associated files deleted successfully!');
@@ -463,20 +1038,20 @@ function App() {
     /** Adds a new question (and optional image) to the form. */
     const handleAddQuestion = async (e) => {
         e.preventDefault();
-        // Image upload was removed for initial question creation
         const text = e.target.question_text.value.trim();
         if (!text) return;
 
-        setFormDataAndDraft({
-            ...formData,
-            questions: [...formData.questions, { 
+        setFormDataAndDraft(prevFormData => ({
+            ...prevFormData,
+            questions: [...(prevFormData.questions || []), { 
+                id: crypto.randomUUID(), // Unique ID for keying/removal
                 text, 
                 image: null, 
                 type: 'multiple_choice', // Default to multiple choice
                 options: [], 
                 correct: -1 
             }]
-        });
+        }));
         e.target.reset(); // Clear form inputs
     };
 
@@ -490,14 +1065,7 @@ function App() {
         }
         
         // Delete images associated with options
-        if (questionToRemove.type === 'multiple_choice') {
-            for (const option of questionToRemove.options) {
-                if (option.image) {
-                    await fileSystem.deleteUpload(option.image);
-                }
-            }
-        } else if (questionToRemove.type === 'connecting_dots') {
-             // For Connecting Dots, options have 'image' property
+        if (questionToRemove.options) {
             for (const option of questionToRemove.options) {
                 if (option.image) {
                     await fileSystem.deleteUpload(option.image);
@@ -505,15 +1073,20 @@ function App() {
             }
         }
 
-        const newQuestions = formData.questions.filter((_, i) => i !== qIndex);
+        const newQuestions = (formData.questions || []).filter((_, i) => i !== qIndex);
         setFormDataAndDraft({ ...formData, questions: newQuestions });
     };
     
     /** Handles image upload/replacement for an existing question (only for Multiple Choice). */
     const handleUpdateQuestion = async (e, qIndex) => { 
         e.preventDefault();
-        const questions = [...formData.questions];
-        const newFile = e.target.question_image.files[0];
+        const questions = [...(formData.questions || [])];
+        if (!questions[qIndex]) return;
+        
+        // The actual file input is hidden inside a label now, so we must access it directly:
+        const fileInput = document.getElementById(`question_image_${qIndex}`); 
+        const newFile = fileInput ? fileInput.files[0] : null;
+
         let currentImage = questions[qIndex].image;
         
         if (newFile && session && formId) {
@@ -544,9 +1117,13 @@ function App() {
             imagePath = await fileSystem.saveUpload(session.user.id, formId, file);
         }
         
-        const questions = [...formData.questions];
-        questions[qIndex].options.push({ text, image: imagePath });
-        setFormDataAndDraft({ ...formData, questions });
+        setFormDataAndDraft(prevFormData => {
+            const newQuestions = [...(prevFormData.questions || [])];
+            if (!newQuestions[qIndex]) return prevFormData;
+
+            newQuestions[qIndex].options = [...(newQuestions[qIndex].options || []), { id: crypto.randomUUID(), text, image: imagePath }];
+            return { ...prevFormData, questions: newQuestions };
+        });
         e.target.reset();
     };
 
@@ -557,10 +1134,10 @@ function App() {
         if (!text) return;
 
         setFormDataAndDraft(prevFormData => {
-            const newQuestions = [...prevFormData.questions];
-            // The structure is simple text options
-            newQuestions[qIndex].options.push({ text: text }); 
-            // Ensure correct property exists
+            const newQuestions = [...(prevFormData.questions || [])];
+            if (!newQuestions[qIndex]) return prevFormData;
+            
+            newQuestions[qIndex].options = [...(newQuestions[qIndex].options || []), { id: crypto.randomUUID(), text: text }]; 
             if (newQuestions[qIndex].correct === undefined) newQuestions[qIndex].correct = -1;
             return { ...prevFormData, questions: newQuestions };
         });
@@ -598,8 +1175,10 @@ function App() {
         ];
 
         setFormDataAndDraft(prevFormData => {
-            const newQuestions = [...prevFormData.questions];
-            newQuestions[qIndex].options = [...newQuestions[qIndex].options, ...newOptions];
+            const newQuestions = [...(prevFormData.questions || [])];
+            if (!newQuestions[qIndex]) return prevFormData;
+
+            newQuestions[qIndex].options = [...(newQuestions[qIndex].options || []), ...newOptions];
             return { ...prevFormData, questions: newQuestions };
         });
 
@@ -609,11 +1188,13 @@ function App() {
     /** Handles image/text updates for an existing Multiple Choice option. */
     const handleUpdateOption = async (e, qIndex, oIndex) => {
         e.preventDefault();
-        const questions = [...formData.questions];
-        const option = questions[qIndex].options[oIndex];
-        const newFile = e.target.option_image.files[0];
+        const questions = [...(formData.questions || [])];
+        if (!questions[qIndex] || !questions[qIndex].options || !questions[qIndex].options[oIndex]) return;
         
-        // Text is handled by the onChange handler (handleUpdateItemText)
+        const option = questions[qIndex].options[oIndex];
+
+        const fileInput = document.getElementById(`option_image_${qIndex}_${oIndex}`);
+        const newFile = fileInput ? fileInput.files[0] : null;
         
         if (newFile && session && formId) {
             if (option.image) await fileSystem.deleteUpload(option.image);
@@ -621,16 +1202,19 @@ function App() {
         }
         
         setFormDataAndDraft({ ...formData, questions });
-        // Since this is a form submit, you could clear the file input here if needed:
-        // e.target.reset();
+        e.target.reset();
     };
 
     /** Handles image updates for an existing Connecting Dot option. */
     const handleUpdateCDOptionImage = async (e, qIndex, oIndex) => {
         e.preventDefault();
-        const questions = [...formData.questions];
+        const questions = [...(formData.questions || [])];
+        if (!questions[qIndex] || !questions[qIndex].options || !questions[qIndex].options[oIndex]) return;
+        
         const option = questions[qIndex].options[oIndex];
-        const newFile = e.target.option_image.files[0];
+
+        const fileInput = document.getElementById(`cd_option_image_${qIndex}_${oIndex}`);
+        const newFile = fileInput ? fileInput.files[0] : null;
         
         if (newFile && session && formId) {
             if (option.image) await fileSystem.deleteUpload(option.image);
@@ -645,59 +1229,67 @@ function App() {
 
     /** Removes an option, handling image deletion for MC/CD and pair removal for CD. */
     const handleRemoveOption = async (qIndex, oIndex) => { 
-        const questions = [...formData.questions];
-        const question = questions[qIndex];
-        const optionToRemove = question.options[oIndex];
+        setFormDataAndDraft(prevFormData => {
+            const questions = [...(prevFormData.questions || [])];
+            if (!questions[qIndex] || !questions[qIndex].options) return prevFormData;
 
-        let newOptions = [...question.options];
-        let optionsToKeep;
+            const question = questions[qIndex];
+            const optionToRemove = question.options[oIndex];
 
-        if (question.type === 'connecting_dots') {
-            const matchId = optionToRemove.matchId;
-            const optionToMatch = newOptions.find(o => o.id === matchId);
-            
-            // Delete images for both options in the pair
-            if (optionToRemove.image) {
-                await fileSystem.deleteUpload(optionToRemove.image);
-            }
-            if (optionToMatch && optionToMatch.image) {
-                await fileSystem.deleteUpload(optionToMatch.image);
+            let newOptions = [...question.options];
+            let optionsToKeep;
+
+            if (question.type === 'connecting_dots') {
+                const matchId = optionToRemove.matchId;
+                const optionToMatch = newOptions.find(o => o.id === matchId);
+                
+                // Delete images for both options in the pair (async outside of set state)
+                if (optionToRemove.image) {
+                    fileSystem.deleteUpload(optionToRemove.image);
+                }
+                if (optionToMatch && optionToMatch.image) {
+                    fileSystem.deleteUpload(optionToMatch.image);
+                }
+
+                // Filter out both the selected option (by index) and its pair (by ID)
+                optionsToKeep = newOptions.filter((option, i) => i !== oIndex && option.id !== matchId);
+                
+            } else { // Handles multiple_choice and fill_in_blanks
+                
+                if (question.type === 'multiple_choice' && optionToRemove.image) {
+                    // Delete image only for multiple choice (async outside of set state)
+                    fileSystem.deleteUpload(optionToRemove.image);
+                }
+                
+                optionsToKeep = newOptions.filter((_, i) => i !== oIndex);
+                
+                // Update the correct answer index
+                if (question.correct === oIndex) {
+                    questions[qIndex].correct = -1; 
+                } else if (question.correct > oIndex) {
+                    questions[qIndex].correct -= 1; 
+                }
             }
 
-            // Filter out both the selected option (by index) and its pair (by ID)
-            optionsToKeep = newOptions.filter((option, i) => i !== oIndex && option.id !== matchId);
-            
-        } else { // Handles multiple_choice and fill_in_blanks
-            
-            if (question.type === 'multiple_choice' && optionToRemove.image) {
-                // Delete image only for multiple choice
-                await fileSystem.deleteUpload(optionToRemove.image);
-            }
-            
-            optionsToKeep = newOptions.filter((_, i) => i !== oIndex);
-            
-            // Update the correct answer index
-            if (question.correct === oIndex) {
-                questions[qIndex].correct = -1; 
-            } else if (question.correct > oIndex) {
-                questions[qIndex].correct -= 1; 
-            }
-        }
-
-        questions[qIndex].options = optionsToKeep;
-        setFormDataAndDraft({ ...formData, questions });
+            questions[qIndex].options = optionsToKeep;
+            return { ...prevFormData, questions: questions };
+        });
     };
     
     /** Sets a specific option as the correct answer for its question (Multiple Choice/Fill in Blanks only). */
     const handleSetCorrect = (qIndex, oIndex) => {
-        const questions = [...formData.questions];
-        questions[qIndex].correct = oIndex;
-        setFormDataAndDraft({ ...formData, questions });
+        setFormDataAndDraft(prevFormData => {
+            const newQuestions = [...(prevFormData.questions || [])];
+            if (!newQuestions[qIndex]) return prevFormData;
+            
+            newQuestions[qIndex].correct = oIndex;
+            return { ...prevFormData, questions: newQuestions };
+        });
     };
 
 
     // =================================================================
-    // 5. RENDER LOGIC
+    // 5. RENDER LOGIC (CLEANED UP)
     // =================================================================
 
     const user = session ? session.user : null;
@@ -721,235 +1313,123 @@ function App() {
     // --- Main Application View (If logged in) ---
     return (
         <div>
-            <h1>Supabase Form Builder</h1>
-            <p>Welcome, {user.email}! (You are currently logged in)</p>
-            <p>Forms and images are stored securely in your Supabase account.</p>
+            {/* Custom Notification Modal Render */}
+            {notification.show && (
+                <NotificationModal 
+                    message={notification.message} 
+                    isLink={notification.isLink}
+                    onClose={() => setNotification({ show: false, message: '', isLink: false })}
+                />
+            )}
 
             {error && <p className="error">{error}</p>}
             {success && <p className="success">{success}</p>}
 
-            <h2>Create New Form</h2>
-            <form onSubmit={handleCreateForm}>
+            <form onSubmit={handleCreateForm} id="createFormHeader">
                 <input 
                     type="text" 
                     name="form_title" 
-                    placeholder="Form title" 
+                    placeholder="New Questionnaire Name Here" 
                     required 
                     // Controlled input ensures this box clears on form switch
                     value={newFormTitle} 
                     onChange={(e) => setNewFormTitle(e.target.value)}
                 />
-                <button type="submit">Create Form</button>
+                <button type="submit">CREATE FORM</button>
             </form>
 
             {/* Form Editor View (only visible when a form is selected) */}
-            {formId && formData.id && (
-                <div key={formId}> 
-                    <h2>Editing Form: {formData.title}</h2>
-                    
-                    {/* Title Input */}
-                    <input 
-                        key={formId}
-                        type="text" 
-                        name="form_title" 
-                        defaultValue={formData.title} 
-                        required 
-                        onBlur={(e) => {
-                            const newTitle = e.target.value.trim();
-                            if (newTitle && newTitle !== formData.title) {
-                                setFormDataAndDraft({ ...formData, title: newTitle });
-                            }
-                        }}
-                    />
+            {formId && formData.module_id && (
+                <div id="formPage" key={formId}>                    
+                    {/* NEW DIV WRAPPING TITLE INPUT AND BUTTONS */}
+                    <div id="formEditingHeader">
+                        {/* Title Input */}
+                        <div>
+                            <input 
+                                key={formId}
+                                style={{ 
+                                    margin: '10px 0px', 
+                                }} 
+                                type="text" 
+                                name="form_title" 
+                                placeholder="Questionnaire Name Here" 
+                                defaultValue={formData.title} 
+                                required 
+                                onBlur={(e) => {
+                                    const newTitle = e.target.value.trim();
+                                    if (newTitle && newTitle !== formData.title) {
+                                        setFormDataAndDraft({ ...formData, title: newTitle });
+                                    }
+                                }}
+                            />
 
-                    <div>
-                        <button onClick={handleSaveForm} className="save-button">Save JSON to Database</button>
-                        <button onClick={handleDeleteForm} className="delete-button">Delete Form & Images</button>
+                            {/* --- NEW DESCRIPTION TEXTAREA --- */}
+                            <textarea 
+                                key={`desc-${formId}`} // Key for controlled reset on form switch
+                                name="form_description" 
+                                placeholder="A brief description for your module (optional)" 
+                                rows="3"
+                                defaultValue={formData.description} 
+                                style={{ 
+                                    width: '100%', 
+                                    padding: '10px', 
+                                    margin: '10px 0', 
+                                    boxSizing: 'border-box',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '4px'
+                                }} 
+                                onBlur={(e) => {
+                                    // Update description state on blur
+                                    const newDescription = e.target.value.trim();
+                                    // Only update state if the description has changed
+                                    if (newDescription !== formData.description) {
+                                        setFormDataAndDraft({ ...formData, description: newDescription });
+                                    }
+                                }}
+                            />
+                            {/* --- END NEW DESCRIPTION TEXTAREA --- */}
+                        </div>
+
+                        <div>
+                            {/* Renamed button to Save Draft and added handlePublishModule */}
+                            <button id="saveModule" onClick={handleSaveForm} className="save-button">SAVE DRAFT</button>
+                            <button id="deleteModule" onClick={handleDeleteForm} className="delete-button">DELETE MODULE</button>
+                            <button id="saveModule" onClick={handlePublishModule} className="publish-button">PUBLISH</button>
+                        </div>
                     </div>
+                    {/* END NEW DIV */}
 
-                    {/* --- Question/Option editing interface --- */}
-                    {formData.questions.length === 0 ? (
-                        <p>No questions yet. Add one below.</p>
-                    ) : (
+                    {/* --- Question/Option editing interface (USING NEW COMPONENT) --- */}
+                    {(formData.questions && formData.questions.length > 0) ? (
                         formData.questions.map((question, qIndex) => (
-                            <div key={qIndex} className="question" style={{ border: '1px solid #ccc', padding: '15px', marginBottom: '20px' }}>
-                                
-                                {/* Question Text and Image Update Form */}
-                                <form onSubmit={(e) => handleUpdateQuestion(e, qIndex)} encType="multipart/form-data">
-                                    
-                                    {/* Conditional Question Text Input */}
-                                    {question.type === 'fill_in_blanks' ? (
-                                        <textarea 
-                                            name="question_text" 
-                                            value={question.text} 
-                                            required 
-                                            rows="5"
-                                            placeholder="Enter the entire paragraph text here."
-                                            onChange={(e) => handleUpdateItemText(qIndex, undefined, e.target.value)}
-                                        />
-                                    ) : (
-                                        <input 
-                                            type="text" 
-                                            name="question_text" 
-                                            value={question.text} 
-                                            required 
-                                            onChange={(e) => handleUpdateItemText(qIndex, undefined, e.target.value)}
-                                        />
-                                    )}
-                                    
-                                    {/* Only allow question image upload for multiple choice */}
-                                    {question.type === 'multiple_choice' && (
-                                        <>
-                                            <label htmlFor={`question_image_${qIndex}`}>Question Image (optional):</label>
-                                            <input type="file" name="question_image" id={`question_image_${qIndex}`} accept="image/*" />
-                                            <button type="submit">Update Question Image</button>
-                                        </>
-                                    )}
-                                </form>
-
-                                {/* Only display question image for multiple choice */}
-                                {question.type === 'multiple_choice' && <StorageImage filePath={question.image} />}
-
-                                <button onClick={() => handleRemoveQuestion(qIndex)} style={{ marginBottom: '10px' }}>Remove Question</button>
-
-                                {/* --- Conditional Option Editors (MC and FITB share structure) --- */}
-                                
-                                {(question.type === 'multiple_choice' || question.type === 'fill_in_blanks') && (
-                                    <>
-                                        <h4>Options:</h4>
-                                        {question.type === 'fill_in_blanks' && <p>Select the correct **answer** that will be placed in a blank. The student will choose the correct answer from these options.</p>}
-                                        
-                                        {question.options.length === 0 ? (
-                                            <p>No options yet. Add one below.</p>
-                                        ) : (
-                                            <ul>
-                                                {question.options.map((option, oIndex) => (
-                                                    <li key={oIndex} className="option" style={{ borderBottom: '1px dotted #eee', paddingBottom: '5px' }}>
-                                                        {/* Option Text Input (Controlled Component) */}
-                                                        <input 
-                                                            type="text" 
-                                                            name="option_text" 
-                                                            value={option.text} 
-                                                            style={{ width: '200px' }} 
-                                                            onChange={(e) => handleUpdateItemText(qIndex, oIndex, e.target.value)}
-                                                        />
-                                                        
-                                                        {/* Option Image: Only for Multiple Choice */}
-                                                        {question.type === 'multiple_choice' && (
-                                                            <form style={{ display: 'inline-block', margin: '0 10px' }} onSubmit={(e) => handleUpdateOption(e, qIndex, oIndex)} encType="multipart/form-data">
-                                                                <input 
-                                                                    type="file" 
-                                                                    name="option_image" 
-                                                                    accept="image/*" 
-                                                                    onChange={(e) => e.target.form.requestSubmit()} 
-                                                                />
-                                                                <button type="submit">Update Image</button>
-                                                            </form>
-                                                        )}
-                                                        
-                                                        {question.type === 'multiple_choice' && <StorageImage filePath={option.image} />}
-
-                                                        {question.correct === oIndex ? (
-                                                            <strong>(Correct)</strong>
-                                                        ) : (
-                                                            <button onClick={() => handleSetCorrect(qIndex, oIndex)}>Set as Correct</button>
-                                                        )}
-                                                        <button onClick={() => handleRemoveOption(qIndex, oIndex)}>Remove</button>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )}
-
-                                        {/* Add Option Form */}
-                                        <form 
-                                            onSubmit={(e) => question.type === 'multiple_choice' ? handleAddMultipleChoiceOption(e, qIndex) : handleAddFillInTheBlankOption(e, qIndex)} 
-                                            encType={question.type === 'multiple_choice' ? "multipart/form-data" : "application/x-www-form-urlencoded"}
-                                        >
-                                            <input type="text" name="option_text" placeholder="New option text" required />
-                                            
-                                            {/* Option Image: Only for Multiple Choice */}
-                                            {question.type === 'multiple_choice' && (
-                                                <>
-                                                    <label htmlFor={`option_image_${qIndex}`}>Option Image (optional):</label>
-                                                    <input type="file" name="option_image" id={`option_image_${qIndex}`} accept="image/*" />
-                                                </>
-                                            )}
-                                            <button type="submit">Add Option</button>
-                                        </form>
-                                    </>
-                                )}
-                                
-                                {question.type === 'connecting_dots' && (
-                                    <>
-                                        <h4>Connecting Pairs:</h4>
-                                        <p style={{ margin: '5px 0' }}>**Note:** Options must be added in matched pairs. Deleting one option deletes its pair.</p>
-
-                                        {question.options.length === 0 ? (
-                                            <p>No pairs yet. Add a new pair below.</p>
-                                        ) : (
-                                            <ul>
-                                                {question.options.map((option, oIndex) => (
-                                                    <li key={option.id} className="option" style={{ borderBottom: '1px dotted #eee', paddingBottom: '5px' }}>
-                                                        <form onSubmit={(e) => handleUpdateCDOptionImage(e, qIndex, oIndex)} encType="multipart/form-data">
-                                                            {/* Text Input (Handled by onChange, not form submit) */}
-                                                            <input 
-                                                                type="text" 
-                                                                value={option.text} 
-                                                                style={{ width: '200px' }} 
-                                                                onChange={(e) => handleUpdateItemText(qIndex, oIndex, e.target.value)}
-                                                            />
-                                                            
-                                                            {/* Image Update */}
-                                                            <input 
-                                                                type="file" 
-                                                                name="option_image" 
-                                                                accept="image/*" 
-                                                                onChange={(e) => e.target.form.requestSubmit()} 
-                                                            />
-                                                            <button type="submit">Update Image</button>
-                                                            <StorageImage filePath={option.image} />
-                                                        </form>
-                                                        
-                                                        <small> (ID: {option.id.substring(0, 4)}... | Match ID: {option.matchId.substring(0, 4)}...)</small>
-
-                                                        <button onClick={() => handleRemoveOption(qIndex, oIndex)}>Remove Pair</button>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )}
-                                        
-                                        {/* Add Pair Form with Images */}
-                                        <form onSubmit={(e) => handleAddConnectingDotPair(e, qIndex)} encType="multipart/form-data" style={{ border: '1px dashed #ccc', padding: '10px' }}>
-                                            <div style={{ marginBottom: '10px' }}>
-                                                <input type="text" name="text1" placeholder="Text for Col. 1" required style={{ display: 'block', marginBottom: '5px' }}/>
-                                                <label>Image 1 (optional):</label>
-                                                <input type="file" name="file1" accept="image/*" />
-                                            </div>
-                                            <div style={{ marginBottom: '10px' }}>
-                                                <input type="text" name="text2" placeholder="Text for Col. 2" required style={{ display: 'block', marginBottom: '5px' }}/>
-                                                <label>Image 2 (optional):</label>
-                                                <input type="file" name="file2" accept="image/*" />
-                                            </div>
-                                            <button type="submit">Add Pair</button>
-                                        </form>
-                                    </>
-                                )}
-
-                                {/* Question Type Selector is now at the very bottom of the question block */}
-                                <QuestionTypeSelector 
-                                    currentType={question.type} 
-                                    qIndex={qIndex} 
-                                    onTypeChange={handleUpdateQuestionType} 
-                                />
-                            </div>
+                            <QuestionEditor
+                                key={qIndex}
+                                question={question}
+                                qIndex={qIndex}
+                                // Pass all handlers required by the editor and its children
+                                onUpdateItemText={handleUpdateItemText}
+                                onUpdateQuestion={handleUpdateQuestion}
+                                onRemoveQuestion={handleRemoveQuestion}
+                                onUpdateQuestionType={handleUpdateQuestionType}
+                                onRemoveOption={handleRemoveOption}
+                                // MC/FITB Handlers
+                                handleAddMultipleChoiceOption={handleAddMultipleChoiceOption}
+                                handleAddFillInTheBlankOption={handleAddFillInTheBlankOption}
+                                handleUpdateOption={handleUpdateOption}
+                                handleSetCorrect={handleSetCorrect}
+                                // CD Handlers
+                                handleAddConnectingDotPair={handleAddConnectingDotPair}
+                                onUpdateCDOptionImage={handleUpdateCDOptionImage}
+                            />
                         ))
+                    ) : (
+                        <p>No questions yet. Add one below.</p>
                     )}
 
                     {/* --- Add New Question Input --- */}
-                    <h3>Add New Question</h3>
                     <form onSubmit={handleAddQuestion}> 
-                        <input type="text" name="question_text" placeholder="Question text" required />
-                        <button type="submit">Add Question</button>
+                        <input id="addQuestionInput" type="text" name="question_text" placeholder="Question text" required />
+                        <button id="addQuestionButton" type="submit">Add Question</button>
                     </form>
                 </div>
             )}
@@ -972,7 +1452,7 @@ ReactDOM.render(<App />, document.getElementById('root'));
 
 
 // =================================================================
-// 7. THE MODULAR COMPONENT
+// 7. THE MODULAR COMPONENT (UserFormsList)
 // =================================================================
 
 function UserFormsList() {
@@ -984,8 +1464,10 @@ function UserFormsList() {
         try {
             const { data, error } = await supabase
                 .from(FORMS_TABLE)
-                .select('id, title')
-                .eq('user_id', uid); 
+                // Select module_id (was id)
+                .select('module_id, title')
+                // Filter by teacher_id (was teacher_id)
+                .eq('teacher_id', uid); 
             
             if (error) throw error;
 
@@ -1002,20 +1484,27 @@ function UserFormsList() {
 
     // Check for active session and load forms
     React.useEffect(() => {
-        supabase.auth.getSession()
-            .then(({ data: { session } }) => {
+        const checkSessionAndLoad = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
                 if (session && session.user) {
                     loadFormsList(session.user.id);
                 } else {
                     setFormsList([]); 
                     setLoading(false);
                 }
-            })
-            .catch((err) => {
+            } catch (err) {
                  console.error("Session Check Error:", err.message);
                  setFormsList([]);
                  setLoading(false);
-            });
+            }
+        };
+
+        checkSessionAndLoad();
+
+        // No need for onAuthStateChange here unless this component is always visible and needs instant update.
+        // Keeping it simple for modular component.
+
     }, []);
 
     // --- Render Logic ---
@@ -1025,8 +1514,6 @@ function UserFormsList() {
     }
 
     if (debugError) {
-        // Return null/empty string to avoid showing non-list elements, 
-        // but keep the console error for the user to check.
         return null; 
     }
     
@@ -1039,8 +1526,9 @@ function UserFormsList() {
     return (
         <ul style={{ padding: 0}}>
             {formsList.map(form => (
-                <li key={form.id}>
-                    <a style={{ color: '#000' }} href={`module.html?form_id=${form.id}`}>
+                // Use module_id for key and link
+                <li key={form.module_id}> 
+                    <a style={{ color: '#000' }} href={`?form_id=${form.module_id}`}>
                         {form.title}
                     </a>
                 </li>
@@ -1055,10 +1543,6 @@ function UserFormsList() {
 
 // Ensure this ID matches the div in your HTML
 ReactDOM.render(<UserFormsList />, document.getElementById('forms-list-container'));
-
-
-
-
 
 
 const e = React.createElement;
@@ -1087,8 +1571,7 @@ function AuthToggle() {
             const { error } = await supabase.auth.signOut();
             if (error) throw error;
             
-            // On success, the main app.js redirect should handle the rest, but 
-            // reloading ensures all modular components update instantly.
+            // Reload ensures all modular components update instantly after logout
             window.location.reload(); 
             
         } catch (err) {
@@ -1106,23 +1589,27 @@ function AuthToggle() {
     // --- Session Check Effect ---
     
     React.useEffect(() => {
-        supabase.auth.getSession()
-            .then(({ data: { session } }) => {
+        
+        const { data: { subscription } = {} } = supabase.auth.onAuthStateChange(
+            (event, session) => {
+                // Determine logged-in status based on the session object
                 setIsLoggedIn(!!session);
-            })
-            .catch((err) => {
-                console.error("AuthToggle session check failed:", err);
-                setIsLoggedIn(false);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+                setLoading(false); 
+            }
+        );
+
+        // Cleanup: Unsubscribe from the listener when component unmounts
+        return () => {
+             if (subscription && typeof subscription.unsubscribe === 'function') {
+                subscription.unsubscribe();
+            }
+        };
     }, []);
 
     // --- Render Logic ---
 
     const baseStyle = { 
-        fontfamily: 'Inknut Antiqua SemiBold',
+        fontFamily: 'Inknut Antiqua SemiBold',
         fontSize: '14px',
         padding: '1em', 
         border: 'none', 
@@ -1137,13 +1624,13 @@ function AuthToggle() {
 
     if (loading) {
         buttonText = 'Checking...';
-        buttonProps = { disabled: true, style: { ...baseStyle, backgroundColor: '#cccccc01', fontfamily: 'Inknut Antiqua SemiBold' } };
+        buttonProps = { disabled: true, style: { ...baseStyle, backgroundColor: '#cccccc01', fontFamily: 'Inknut Antiqua SemiBold' } };
     } else if (isLoggedIn) {
         buttonText = 'LOG OUT';
         buttonProps = { 
             onClick: handleLogout,
             disabled: false,
-            style: { ...baseStyle, color: 'white', fontfamily: 'Inknut Antiqua SemiBold' },
+            style: { ...baseStyle, color: 'white', fontFamily: 'Inknut Antiqua SemiBold' },
             id: 'LOGOUTBUTTON'
         };
     } else {
@@ -1151,7 +1638,7 @@ function AuthToggle() {
         buttonProps = { 
             onClick: handleLogin, 
             disabled: false, 
-            style: { ...baseStyle, color: 'white', fontfamily: 'Inknut Antiqua SemiBold'},
+            style: { ...baseStyle, color: 'white', fontFamily: 'Inknut Antiqua SemiBold'},
             id: 'LOGINBUTTON'
         };
     }

@@ -13,13 +13,124 @@ const STUDENTS_TABLE = 'students';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); 
 
 // =================================================================
-// 2. MAIN LIST COMPONENT
+// NEW: ATTEMPTS MODAL COMPONENT (Non-blocking notification)
+// =================================================================
+
+/**
+ * A simple, unstyled modal component to display the list of attempts.
+ */
+function AttemptsModal({ moduleTitle, attempts, onClose }) {
+    if (!attempts && moduleTitle) {
+        // Simple loading state if title is available but data is null (fetching)
+        return (
+             <div style={{
+                position: 'fixed', top: 0, left: 0, width: '50vw', height: '100%',
+                backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center',
+                alignItems: 'center', zIndex: 1000
+            }}>
+                <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '5px', width: '50vw' }}>
+                    Loading attempts for "{moduleTitle}"...
+                </div>
+            </div>
+        );
+    }
+    
+    if (!attempts) return null; // Don't render if no data is passed (closed or initial state)
+
+    // A basic, unstyled modal overlay and content structure
+    const modalStyle = {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Dark overlay
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000,
+        color: 'black',
+    };
+
+    const contentStyle = {
+        backgroundColor: 'white',
+        padding: '20px',
+        borderRadius: '5px',
+        width: '50vw',
+        maxHeight: '80%',
+        overflowY: 'auto',
+        position: 'relative',
+        color: 'black',
+    };
+
+    const headerStyle = {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '10px',
+        borderBottom: '1px solid #ccc',
+        paddingBottom: '5px',
+        color: 'black',
+    };
+
+    const closeButtonStyle = {
+        cursor: 'pointer',
+        fontSize: '20px',
+        border: 'none',
+        backgroundColor: 'transparent',
+        color: 'black',
+    };
+
+    const attemptItemStyle = {
+        border: '1px solid #eee',
+        padding: '10px',
+        marginBottom: '10px',
+        borderRadius: '3px',
+        color: 'black',
+    };
+
+    return (
+        <div style={modalStyle}>
+            <div style={contentStyle}>
+                <div style={headerStyle}>
+                    <h2>Attempts for "{moduleTitle}"</h2>
+                    <button style={closeButtonStyle} onClick={onClose}>&times;</button>
+                </div>
+
+                {attempts.length === 0 ? (
+                    <p style={{color: 'black'}}>No attempts found for this module.</p>
+                ) : (
+                    <>
+                        <p>Total Attempts: {attempts.length}</p>
+                        {attempts.map((attempt, index) => (
+                            <div key={index} style={attemptItemStyle}>
+                                <strong style={{color: 'black'}}>Attempt {index + 1}</strong>
+                                <ul>
+                                    <li style={{color: 'black'}}>Student: {attempt.studentName}</li>
+                                    <li style={{color: 'black'}}>Score: {attempt.score}%</li>
+                                    <li style={{color: 'black'}}>Correct: {attempt.totalCorrect} / {attempt.totalQuestions}</li>
+                                </ul>
+                            </div>
+                        ))}
+                    </>
+                )}
+            </div>
+        </div>
+    );
+}
+
+// =================================================================
+// 2. MAIN LIST COMPONENT (UPDATED)
 // =================================================================
 
 function BareListApp() {
     const [formsList, setFormsList] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
     const [hasSession, setHasSession] = React.useState(false);
+
+    // NEW STATE: To control the modal visibility and content
+    // Format: { title: string, attempts: array | null }
+    const [modalData, setModalData] = React.useState(null); 
 
     // Function to load the forms list and their attempt counts
     const loadFormsList = async (uid) => {
@@ -57,8 +168,10 @@ function BareListApp() {
         }
     };
     
-    // NEW FUNCTION: Handles the "SHOW ATTEMPTS" button click and displays an alert
+    // UPDATED FUNCTION: Handles the "SHOW ATTEMPTS" button click and prepares modal data
     const handleShowAttempts = async (moduleId, moduleTitle) => {
+        // Show loading state in modal immediately
+        setModalData({ title: moduleTitle, attempts: null }); 
         try {
             // Fetch attempt data, and join to get the student name using the foreign key relationship
             const { data: attemptsData, error } = await supabase
@@ -72,14 +185,7 @@ function BareListApp() {
 
             if (error) throw error;
 
-            if (!attemptsData || attemptsData.length === 0) {
-                alert(`No attempts found for module: ${moduleTitle}`);
-                return;
-            }
-
-            let alertMessage = `Attempts for "${moduleTitle}" (${attemptsData.length} total):\n\n`;
-
-            attemptsData.forEach((attempt, index) => {
+            const structuredAttempts = (attemptsData || []).map((attempt) => {
                 // Extract student Display_name from the joined object
                 const studentName = attempt.students ? attempt.students.Display_name : 'Unknown Student';
                 
@@ -88,18 +194,31 @@ function BareListApp() {
                 const totalCorrect = attempt.attempt_data?.total_correct || 0;
                 const totalQuestions = attempt.attempt_data?.total_questions || 0;
                 
-                alertMessage += `Attempt ${index + 1}:\n`;
-                alertMessage += `  Student: ${studentName}\n`;
-                alertMessage += `  Score: ${score}\n`;
-                alertMessage += `  Correct: ${totalCorrect} / ${totalQuestions}\n\n`;
+                return {
+                    studentName,
+                    score,
+                    totalCorrect,
+                    totalQuestions
+                };
             });
 
-            alert(alertMessage);
+            // Update state to show the modal with the fetched data
+            setModalData({ 
+                title: moduleTitle, 
+                attempts: structuredAttempts 
+            });
 
         } catch (err) {
             console.error("Error fetching attempt details:", err);
+            // Show error in an alert and close the modal state
             alert(`Failed to load attempts for ${moduleTitle}. Error: ${err.message}`);
+            setModalData(null); 
         }
+    };
+
+    // NEW FUNCTION: Handler to close the modal
+    const handleCloseModal = () => {
+        setModalData(null);
     };
 
 
@@ -126,27 +245,38 @@ function BareListApp() {
         return null;
     }
 
-    // Render only the pure unstyled list (UL)
+    // Render the pure unstyled list (UL) and the modal component
     return (
-        <ul>
-            {formsList.map(form => (
-                // RENAMED property access from form.id to form.module_id
-                <li key={form.module_id}>
-                    <div>
-                        {/* RENAMED property access from form.id to form.module_id */}
-                        <a href={`https://wikan-galing-student-side.vercel.app?form_id=${form.module_id}`}>
-                            {form.title}
-                        </a>
-                        {/* Attach the new click handler, RENAMED property access */}
-                        <button onClick={() => handleShowAttempts(form.module_id, form.title)}> 
-                            SHOW ATTEMPTS
-                        </button>
-                    </div>
+        <>
+            <ul>
+                {formsList.map(form => (
+                    // RENAMED property access from form.id to form.module_id
+                    <li key={form.module_id}>
+                        <div>
+                            {/* RENAMED property access from form.id to form.module_id */}
+                            <a href={`https://wikan-galing-student-side.vercel.app?form_id=${form.module_id}`}>
+                                {form.title}
+                            </a>
+                            {/* Attach the new click handler, RENAMED property access */}
+                            <button onClick={() => handleShowAttempts(form.module_id, form.title)}> 
+                                SHOW ATTEMPTS
+                            </button>
+                        </div>
 
-                    <p>Attempts: {form.attemptsCount}</p> 
-                </li>
-            ))}
-        </ul>
+                        <p>Attempts: {form.attemptsCount}</p> 
+                    </li>
+                ))}
+            </ul>
+            
+            {/* RENDER THE MODAL IF modalData IS SET */}
+            {modalData && (
+                <AttemptsModal 
+                    moduleTitle={modalData.title}
+                    attempts={modalData.attempts}
+                    onClose={handleCloseModal}
+                />
+            )}
+        </>
     );
 }
 
