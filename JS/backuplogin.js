@@ -9,7 +9,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); 
 
 // =================================================================
-// 2. MODAL COMPONENT
+// 2. MODAL COMPONENT (NEW)
 // =================================================================
 
 /** Simple Modal component to notify the user to confirm their email. */
@@ -40,37 +40,27 @@ function ConfirmationModal({ onClose }) {
 function LoginForm() {
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
-    
-    // NEW STATE: Display Name
-    const [displayName, setDisplayName] = React.useState(''); 
-    
     const [isRegistering, setIsRegistering] = React.useState(false);
     const [error, setError] = React.useState('');
+    
+    // State for controlling the modal visibility
     const [showModal, setShowModal] = React.useState(false); 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        // setShowModal is used instead of setSuccess
         setShowModal(false); 
         
         try {
             let response;
             if (isRegistering) {
-                // Attempt to sign up a new user, including the display name in metadata
-                response = await supabase.auth.signUp({ 
-                    email, 
-                    password,
-                    // ADDED: Include the display name in the data option
-                    options: {
-                        data: {
-                            display_name: displayName, 
-                        }
-                    }
-                });
+                // Attempt to sign up a new user
+                response = await supabase.auth.signUp({ email, password });
                 
                 if (response.error) throw response.error;
                 
-                // On successful sign-up, show the modal
+                // On successful sign-up, show the modal instead of the text notification
                 setShowModal(true);
                 return; // Stop execution after setting the modal
                 
@@ -94,10 +84,10 @@ function LoginForm() {
     // Handler to close the modal
     const handleCloseModal = () => {
         setShowModal(false);
-        // Clear the form fields and switch back to sign-in view
+        // Optional: clear the form fields after successful sign-up
         setEmail('');
         setPassword('');
-        setDisplayName(''); // Clear display name as well
+        // Switch back to sign-in view
         setIsRegistering(false); 
     };
     
@@ -117,20 +107,6 @@ function LoginForm() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                 />
-
-                {/* NEW INPUT FIELD: Display Name (only shown during registration) */}
-                {isRegistering && (
-                    <>
-                        <label htmlFor="displayName">Display Name:</label>
-                        <input
-                            type="text"
-                            placeholder="Display Name"
-                            value={displayName}
-                            onChange={(e) => setDisplayName(e.target.value)}
-                            required
-                        />
-                    </>
-                )}
 
                 <label htmlFor="password">Password:</label>
                 <input

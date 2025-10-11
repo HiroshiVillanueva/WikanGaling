@@ -2,6 +2,7 @@
 ::-webkit-scrollbar {
     width: 4px; /* Width for vertical scrollbar */
     height: 10px; /* Height for horizontal scrollbar */
+    background: #cbcbcb00;
 }
 
 /* Scrollbar track (the background of the scrollbar) */
@@ -12,7 +13,7 @@
 
 /* Scrollbar thumb (the draggable part) */
 ::-webkit-scrollbar-thumb {
-    background: #888;
+    background: #cbcbcb00;
     border-radius: 5px; /* Rounded corners for the thumb */
 }
 
