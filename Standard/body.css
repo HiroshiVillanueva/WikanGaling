@@ -1,0 +1,51 @@
+*, *::after, *::before {
+    font-family: 'Franklin Gothic regular', 'Arial Narrow', Arial, sans-serif;
+    text-decoration: none;
+    color: #ffffff;
+    list-style: none;
+
+    transition: all ease-in-out 0.05s;
+
+    box-sizing: border-box;
+    object-fit: contain;
+    user-select: none;
+    overflow: hidden;
+}
+
+#content {
+	display: flex;
+    position: absolute;
+    align-items: center;
+	flex-direction: column;
+
+    margin-top: 3.5em;
+    padding: 1em 1em 0em 16em;
+    width: 100vw;
+    height: calc(100vh - 56px);
+
+    overflow-y: scroll !important;
+}
+
+body { 
+    margin: 0; 
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+
+    height: auto;
+    width: auto;
+}
+
+#Bars {
+    display: flex;
+    justify-content: space-between;
+
+    width: 100%;
+    height: auto;
+    margin: auto;
+    padding: 0 0.5em 0 0;
+}
