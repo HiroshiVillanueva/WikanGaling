@@ -145,7 +145,7 @@ function LoginForm() {
             <p>
                 <i>
                 <button id="registering" onClick={() => setIsRegistering(!isRegistering)}>
-                    {isRegistering ? 'Have an account? Sign in' : 'Need an account? Sign Up'}
+                    {isRegistering ? 'Have an account? Sign in' : 'Create Account'}
                 </button>
                 </i>
             </p>
