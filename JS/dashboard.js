@@ -44,7 +44,7 @@ function AttemptsModal({ moduleTitle, attempts, onClose }) {
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Dark overlay
+        backgroundColor: 'rgba(72, 76, 81, 0.5)', // Dark overlay
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -85,8 +85,10 @@ function AttemptsModal({ moduleTitle, attempts, onClose }) {
         border: '1px solid #eee',
         padding: '10px',
         marginBottom: '10px',
-        borderRadius: '3px',
+        borderRadius: '8px',
         color: 'black',
+        backgroundColor: '#d0ddedff',
+        border: 'solid 1px black',
     };
 
     return (
@@ -106,9 +108,9 @@ function AttemptsModal({ moduleTitle, attempts, onClose }) {
                             <div key={index} style={attemptItemStyle}>
                                 <strong style={{color: 'black'}}>Attempt {index + 1}</strong>
                                 <ul>
-                                    <li style={{color: 'black'}}>Student: {attempt.studentName}</li>
-                                    <li style={{color: 'black'}}>Score: {attempt.score}%</li>
-                                    <li style={{color: 'black'}}>Correct: {attempt.totalCorrect} / {attempt.totalQuestions}</li>
+                                    <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Student: {attempt.studentName}</li>
+                                    <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Score: {attempt.score}%</li>
+                                    <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Correct: {attempt.totalCorrect} / {attempt.totalQuestions}</li>
                                 </ul>
                             </div>
                         ))}

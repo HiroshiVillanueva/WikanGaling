@@ -415,7 +415,7 @@ function MultipleChoiceOptions({
                 )}
 
                 {/* Add Option Form */}
-                <form 
+                <form style={{borderTop: 'solid 1px #00000050'}}
                     class="addOptiongroup"
                     onSubmit={(e) => handleAddOption(e, qIndex)} 
                     encType={isMultipleChoice ? "multipart/form-data" : "application/x-www-form-urlencoded"}
