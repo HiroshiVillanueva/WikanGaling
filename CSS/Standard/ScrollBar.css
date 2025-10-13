@@ -13,7 +13,8 @@
 
 /* Scrollbar thumb (the draggable part) */
 ::-webkit-scrollbar-thumb {
-    background: #cbcbcb00;
+    cursor: pointer;
+    background: #cbcbcb;
     border-radius: 5px; /* Rounded corners for the thumb */
 }
 

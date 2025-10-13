@@ -31,22 +31,80 @@ function ConfirmationModal({ onClose }) {
     );
 }
 
+// =================================================================
+// 3. PASSWORD INPUT COMPONENT (MOVED OUTSIDE)
+// =================================================================
+
+/** * Reusable Password Input Field structure with a visibility toggle.
+ * NOTE: This component MUST be defined outside of LoginForm to prevent focus issues.
+ * The focus issue occurred because defining it inside the parent function causes 
+ * React to see it as a new component on every parent re-render.
+ * * UPDATED: Added 'placeholderText' prop.
+ */
+function PasswordInputField({ label, value, onChange, isVisible, onToggleVisibility, placeholderText }) {
+    return (
+        <>
+            <label htmlFor={label}>{label}:</label>
+            <div style={{ position: 'relative' }}> 
+                <input
+                    // Use the visibility state passed from the parent
+                    type={isVisible ? 'text' : 'password'}
+                    // UPDATED: Use the new placeholderText prop
+                    placeholder={placeholderText || label} 
+                    value={value}
+                    onChange={onChange}
+                    required
+                />
+                <button 
+                    type="button" 
+                    onClick={onToggleVisibility} // Use the toggle handler passed from the parent
+                    // Inline style for positioning and to override default button styles
+                    style={{
+                        width: '50px',
+                        height: '50px',
+                        position: 'absolute',
+                        right: '20px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '0', 
+                        boxShadow: 'none',
+                        borderRadius: '0',
+                        margin: '0',
+                        backdropFilter: 'none',
+                        color: 'white',
+                        zIndex: 10, 
+                    }}
+                >
+                    {isVisible ? 'Hide' : 'Show'}
+                </button>
+            </div>
+        </>
+    );
+};
 
 // =================================================================
-// 3. LOGIN FORM COMPONENT
+// 4. LOGIN FORM COMPONENT
 // =================================================================
 
 /** Component for handling user login and registration with Supabase. */
 function LoginForm() {
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
-    
-    // NEW STATE: Display Name
+    const [confirmPassword, setConfirmPassword] = React.useState('');
     const [displayName, setDisplayName] = React.useState(''); 
-    
     const [isRegistering, setIsRegistering] = React.useState(false);
     const [error, setError] = React.useState('');
     const [showModal, setShowModal] = React.useState(false); 
+    
+    // The state and handler for password visibility are kept here (the parent)
+    const [isPasswordVisible, setIsPasswordVisible] = React.useState(false);
+
+    const togglePasswordVisibility = () => {
+        setIsPasswordVisible(!isPasswordVisible);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -56,11 +114,14 @@ function LoginForm() {
         try {
             let response;
             if (isRegistering) {
-                // Attempt to sign up a new user, including the display name in metadata
+                if (password !== confirmPassword) {
+                    setError("Passwords do not match.");
+                    return; 
+                }
+                
                 response = await supabase.auth.signUp({ 
                     email, 
                     password,
-                    // ADDED: Include the display name in the data option
                     options: {
                         data: {
                             display_name: displayName, 
@@ -70,19 +131,16 @@ function LoginForm() {
                 
                 if (response.error) throw response.error;
                 
-                // On successful sign-up, show the modal
                 setShowModal(true);
-                return; // Stop execution after setting the modal
+                return; 
                 
             } else {
-                // Attempt to log in an existing user
                 response = await supabase.auth.signInWithPassword({ email, password });
                 
                 if (response.error) throw response.error;
             }
 
             if (response.data.user) {
-                // Successfully logged in - Redirect to the main application
                 window.location.href = 'index.html';
             }
 
@@ -91,19 +149,31 @@ function LoginForm() {
         }
     };
 
-    // Handler to close the modal
     const handleCloseModal = () => {
         setShowModal(false);
-        // Clear the form fields and switch back to sign-in view
         setEmail('');
         setPassword('');
-        setDisplayName(''); // Clear display name as well
+        setConfirmPassword(''); 
+        setDisplayName(''); 
         setIsRegistering(false); 
     };
     
+    const handleToggleRegistering = () => {
+        setIsRegistering(!isRegistering);
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        setDisplayName('');
+        setError('');
+    };
+    
+    // NEW: Define placeholder text based on the current mode
+    const passwordPlaceholder = isRegistering 
+        ? 'Minimum 6 characters' 
+        : 'Password';
+
     return (
         <div className="auth-container">
-            {/* Render the modal if showModal is true */}
             {showModal && <ConfirmationModal onClose={handleCloseModal} />}
             
             {error && <p className="error">{error}</p>}
@@ -112,19 +182,20 @@ function LoginForm() {
                 <label htmlFor="email">Email:</label>
                 <input
                     type="email"
-                    placeholder="Email"
+                    // Existing change: Placeholder for Email
+                    placeholder={isRegistering ? 'Example@Mail.com' : 'Email'}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                 />
 
-                {/* NEW INPUT FIELD: Display Name (only shown during registration) */}
                 {isRegistering && (
                     <>
-                        <label htmlFor="displayName">Display Name:</label>
+                        <label htmlFor="displayName">Name:</label>
                         <input
                             type="text"
-                            placeholder="Display Name"
+                            // Existing change: Placeholder for Name
+                            placeholder= "John Adams"
                             value={displayName}
                             onChange={(e) => setDisplayName(e.target.value)}
                             required
@@ -132,19 +203,33 @@ function LoginForm() {
                     </>
                 )}
 
-                <label htmlFor="password">Password:</label>
-                <input
-                    type="password"
-                    placeholder="Password"
+                {/* Password Input - Pass the dynamic password placeholder */}
+                <PasswordInputField 
+                    label="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    required
+                    isVisible={isPasswordVisible} 
+                    onToggleVisibility={togglePasswordVisibility}
+                    placeholderText={passwordPlaceholder} // NEW PROP
                 />
+
+                {/* Confirm Password Input - Pass a specific placeholder for confirmation */}
+                {isRegistering && (
+                    <PasswordInputField 
+                        label="Confirm Password" 
+                        value={confirmPassword} 
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        isVisible={isPasswordVisible}
+                        onToggleVisibility={togglePasswordVisibility}
+                        placeholderText="Re-enter password" // NEW PROP
+                    />
+                )}
+                
                 <button id="signing" type="submit">{isRegistering ? 'SIGN UP' : 'SIGN IN'}</button>
             </form>
             <p>
                 <i>
-                <button id="registering" onClick={() => setIsRegistering(!isRegistering)}>
+                <button id="registering" onClick={handleToggleRegistering}>
                     {isRegistering ? 'Have an account? Sign in' : 'Create Account'}
                 </button>
                 </i>
@@ -154,7 +239,7 @@ function LoginForm() {
 }
 
 // =================================================================
-// 4. INITIAL RENDER
+// 5. INITIAL RENDER
 // =================================================================
 
 ReactDOM.render(<LoginForm />, document.getElementById('loginForm'));

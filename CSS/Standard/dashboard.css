@@ -77,3 +77,11 @@
 strong {
     font-family: 'Inknut Antiqua Bold';
 }
+
+
+.modalAttempts {
+    padding: 0 1em;
+    position: relative;
+    height: 50vh !important;
+    overflow-y: scroll !important;
+}

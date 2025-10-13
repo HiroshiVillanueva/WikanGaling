@@ -58,7 +58,6 @@ function AttemptsModal({ moduleTitle, attempts, onClose }) {
         borderRadius: '5px',
         width: '50vw',
         maxHeight: '80%',
-        overflowY: 'auto',
         position: 'relative',
         color: 'black',
     };
@@ -67,18 +66,20 @@ function AttemptsModal({ moduleTitle, attempts, onClose }) {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '10px',
         borderBottom: '1px solid #ccc',
         paddingBottom: '5px',
         color: 'black',
     };
 
     const closeButtonStyle = {
+        fontFamily: 'Inknut Antiqua Light',
+        backgroundColor: 'rgba(236, 236, 236, 0)', 
+        color: 'Black',
         cursor: 'pointer',
-        fontSize: '20px',
-        border: 'none',
-        backgroundColor: 'transparent',
-        color: 'black',
+        border: 'solid 2px black',
+        borderRadius: '8px',
+        lineHeight: '1em',
+        padding: '0.5em 0.6em',
     };
 
     const attemptItemStyle = {
@@ -96,26 +97,27 @@ function AttemptsModal({ moduleTitle, attempts, onClose }) {
             <div style={contentStyle}>
                 <div style={headerStyle}>
                     <h2>Attempts for "{moduleTitle}"</h2>
-                    <button style={closeButtonStyle} onClick={onClose}>&times;</button>
+                    <button style={closeButtonStyle} onClick={onClose}>X</button>
                 </div>
-
-                {attempts.length === 0 ? (
-                    <p style={{color: 'black'}}>No attempts found for this module.</p>
-                ) : (
-                    <>
-                        <p>Total Attempts: {attempts.length}</p>
-                        {attempts.map((attempt, index) => (
-                            <div key={index} style={attemptItemStyle}>
-                                <strong style={{color: 'black'}}>Attempt {index + 1}</strong>
-                                <ul>
-                                    <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Student: {attempt.studentName}</li>
-                                    <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Score: {attempt.score}%</li>
-                                    <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Correct: {attempt.totalCorrect} / {attempt.totalQuestions}</li>
-                                </ul>
-                            </div>
-                        ))}
-                    </>
-                )}
+                <div class="modalAttempts">
+                    {attempts.length === 0 ? (
+                        <p style={{color: 'black'}}>No attempts found for this module.</p>
+                    ) : (
+                        <>
+                            <p>Total Attempts: {attempts.length}</p>
+                            {attempts.map((attempt, index) => (
+                                <div key={index} style={attemptItemStyle}>
+                                    <strong style={{color: 'black'}}>Attempt {index + 1}</strong>
+                                    <ul>
+                                        <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Student: {attempt.studentName}</li>
+                                        <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Score: {attempt.score}%</li>
+                                        <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Correct: {attempt.totalCorrect} / {attempt.totalQuestions}</li>
+                                    </ul>
+                                </div>
+                            ))}
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );

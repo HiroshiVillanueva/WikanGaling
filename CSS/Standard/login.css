@@ -33,7 +33,7 @@
 
     padding: 2em;
 
-    overflow-y: scroll;
+    /* overflow-y: scroll; */
 }
 
 #maincard {
@@ -60,13 +60,14 @@
 
 #loginForm {
     display: grid;
+    height: 100% !important;
     width: 100%;
-    height: max-content;
     
     z-index: 3;
 
     background-color: rgba(0, 0, 255, 0);
     padding-top: 1em;
+    overflow-y: scroll;
 }
 
 form {
@@ -78,6 +79,16 @@ form {
     padding: 3em 2em 0 2em;
 
     background-color: rgba(0, 255, 255, 0);
+}
+
+form div {
+    display: flex;
+    flex-grow: 1;
+}
+
+form div input {
+    flex-grow: 1;
+    margin-bottom: 9px !important;
 }
 
 label {
@@ -134,7 +145,8 @@ p {
 #loginHeader {
     background-color: rgba(255, 228, 196, 0);
     display: flex;
-    align-items: center;
+    align-items: start;
+    align-self: flex-start;
     justify-content: space-between;
     width: 100%;
     
@@ -144,4 +156,8 @@ p {
     margin: 0;
     padding: 0;
     color: rgb(207, 80, 80);
+}
+
+.auth-container {
+    overflow-y: scroll;
 }

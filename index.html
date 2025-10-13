@@ -18,26 +18,34 @@
     <script src="https://unpkg.com/@babel/standalone@7.22.5/babel.min.js"></script> 
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script> 
     <script type="text/babel" src="JS/forms_list_component.js"></script>
+
+    <style>
+        ::-webkit-scrollbar-thumb {
+            cursor: pointer;
+            background: #cbcbcb00;
+            border-radius: 5px; /* Rounded corners for the thumb */
+        }
+    </style>
 </head>
 <body style="background-image: url(Miscellanous/Images/background.jpg);">
     <main style="z-index: 2;">
-
+        <!-- NAVIGATION BARS -->
         <div id="Bars">
             <aside id="SideBarMenu">
                 <img id="imgLogo" src="Miscellanous/Images/Logo.svg" alt="LOGO">
                 <div id="pageMenu">
                     <div class="PageButtons" id="page_1">
-                        <img src="Miscellanous/Images/home.png" alt="*">
+                        <img id="img1" src="Miscellanous/Images/home.png" alt="*">
                         <a id="link_1" href="index.html"><h2>HOME</h2></a>
                     </div>
 
                     <div class="PageButtons" id="page_2">
-                        <img src="Miscellanous/Images/writing.png" alt="*">
-                        <a id="link_2" href="module.html"><h2>CREATE</h2></a>
+                        <img id="img2" src="Miscellanous/Images/writing.png" alt="*">
+                        <a id="link_2" href="module.html"><h2>EDITOR</h2></a>
                     </div>
 
                     <div class="PageButtons" id="page_3">
-                        <img src="Miscellanous/Images/server.png" alt="*">
+                        <img id="img3" src="Miscellanous/Images/server.png" alt="*">
                         <a id="link_3" href="dashboard.html"><h2>DASHBOARD</h2></a>
                     </div>
                 </div>
@@ -46,7 +54,7 @@
 
 
                 <div id="SavesMenu">
-                    <h3>SAVES: </h3>
+                    <h3>SAVED MODULES: </h3>
                     <div id="SavesPage">
 
                         <div id="forms-list-container"></div>
@@ -66,33 +74,36 @@
             <nav>
                 <h1>WIKANGALING</h1>
                 <div id="navOptionSection">
-                    <a href="about us.html">SINO KAMI</a>
+                    <a href="about us.html">ABOUT US</a>
                     <div id="auth-toggle-container"></div>
                 </div>
             </nav>
         </div>
+        <!-- NAVIGATION BARS -->
 
         <div id="content">
             
             <header>
                 <h1>WIKANGALING</h1>
-                <p>Kumusta! at Magandang Araw</p>
+                <p>WELCOME TO THE NEXT STEP OF LEARNING</p>
                 <h2>GAMIFIED LANGUAGE</h2>
                 <h2 id="learning-platform">LEARNING PLATFORM</h2>
-                <p>Para sa kinabukasan sa mga kabataan</p>
+                <p>FOR THE FUTURE OF OUR CHILDREN</p>
                 <a href="userManual.html">GET STARTED</a>
             </header>
 
             <aside id="features">
                 <h2>Features of our Website:</h2>
-                <p>Dito sa website saamin meron kaming maraming mga features na pwede magamit ng mga magtuturo para sa pag pagandahin ang kwalidad ng edukasyon ng mga kabataan!</p>
-                <p>So anong hinihintay mo? Gamit na sa site namin!!!</p>
+                <p>Welcome to the features panel! To start off, all these right here are what you need to get started with to finally make your first Module!</p>
+                <p>Whether it be a quiz, an exam, or even a simple exercise! all these question types are open for any elementary Teacher to use as they please:</p>
                 <ul>
-                    <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Vero nobis doloremque provident pariatur blanditiis aspernatur saepe alias aut rerum facere corporis dicta a soluta eveniet, ipsum dolor cum illum eius!</li>
-                    <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Architecto ipsam nobis laborum, nesciunt similique itaque illo nam repellat inventore aut eveniet ad rerum adipisci corrupti atque iste? Aspernatur, consectetur incidunt.</li>
-                    <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi repellendus ex labore laboriosam porro facere, blanditiis fugit minima aperiam totam, ab, quidem officia ipsam enim odio iste vel illum earum!</li>
+                    <li>> The multiple-choice question format is a type of assessment where a question is followed by several possible answers. The task is to select the correct option from the given choices.</li>
+                    <br>
+                    <li>> The matching type question format presents two columns: one with prompts and the other with possible answers. The task is to correctly pair each item from the first column with its corresponding match in the second.</li>
+                    <br>
+                    <li>> The fill-in-the-blanks question format provides a sentence with a missing word or phrase. Students must supply the correct answer to complete the statement.</li>
                 </ul>
-                <p>Pumili ka lng sa mga seleksyon namin dito!</p>
+                <p>These are all the current available question formats for our module editor!</p>
             </aside>
 
             <div id="cards">
@@ -101,26 +112,26 @@
                     <img src="Miscellanous/Images/MCG.jpg" alt="PICTURE">
                     <div>
                         <h3>MULTIPLE CHOICE</h3>
-                        <p>Turuan ang mga bata sa tulong ng mga pagpipilian</p>
-                        <a href="module.html">CREATE</a>                    
+                        <p>The gold standard for all quizzes out there.</p>
+                        <a href="module.html">LEARN MORE</a>                    
                     </div>
                 </div>
 
                 <div class="card" id="Matching_type_Game/Connect_the_Dots">
                     <img src="Miscellanous/Images/CTD.jpg" alt="PICTURE">
                     <div>
-                        <h3>CONNECTER DOTS</h3>
-                        <p>Turuan ang mga bata sa tulong ng mga pagpipilian</p>
-                        <a href="module.html">CREATE</a>
+                        <h3>MATCHING TYPE</h3>
+                        <p>Simple dot connector for its various columns.</p>
+                        <a href="module.html">LEARN MORE</a>
                     </div>
                 </div>
 
                 <div class="card" id="Sentence_Builder_Game">
                     <img src="Miscellanous/Images/SB.jpg" alt="PICTURE">
                     <div>
-                        <h3>SENTENCE BUILDER</h3>
-                        <p>Turuan ang mga bata sa tulong ng mga pagpipilian</p>
-                        <a href="module.html">CREATE</a>
+                        <h3>FILL IN THE BLANKS</h3>
+                        <p>Text-focused; emphasizing reading comprehension.</p>
+                        <a href="module.html">LEARN MORE</a>
                     </div>
                 </div>
 
