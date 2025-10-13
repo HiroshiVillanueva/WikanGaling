@@ -19,7 +19,7 @@
     position: absolute;
     display: grid;
     align-items: center;
-    width: 50%;
+    width: 38%;
     height: var(--featureSize);
     backdrop-filter: blur(12px) !important;
     border-radius: 16px;
@@ -33,6 +33,7 @@
 
     padding: 2em;
 
+    overflow-x: visible;
     /* overflow-y: scroll; */
 }
 
@@ -59,15 +60,17 @@
 }
 
 #loginForm {
-    display: grid;
+    display: flex;
     height: 100% !important;
     width: 100%;
+    justify-content: center;
     
     z-index: 3;
 
     background-color: rgba(0, 0, 255, 0);
     padding-top: 1em;
     overflow-y: scroll;
+    overflow-x: visible;
 }
 
 form {
@@ -92,7 +95,7 @@ form div input {
 }
 
 label {
-    font-family: 'Inknut Antiqua SemiBold';
+    font-family: 'Inknut Antiqua Regular';
     font-size: large;
     line-height: 1em;
 }
@@ -139,15 +142,16 @@ p {
 }
 
 #signing {
-    font-family: 'Inknut Antiqua Regular';
+    font-family: 'Inknut Antiqua semiBold';
+    padding: 1em 0;
 }
 
 #loginHeader {
     background-color: rgba(255, 228, 196, 0);
     display: flex;
-    align-items: start;
+    align-items: center;
     align-self: flex-start;
-    justify-content: space-between;
+    justify-content: space-around;
     width: 100%;
     
 }
@@ -160,4 +164,32 @@ p {
 
 .auth-container {
     overflow-y: scroll;
+    overflow-x: visible;
+
+    flex-grow: 1;
+}
+
+.auth-container p {
+    margin-top: 0;
+}
+
+.auth-container button {
+    padding: 0.8em 0;
+}
+
+.auth-container form {
+    padding: 24px 16px 16px 16px;
+    margin: 24px 15px 0 15px;
+
+    border-radius: 8px;
+    border: solid 1px white;
+    background-color: rgba(52, 63, 71, 0.292);
+    width: 98%;
+    justify-self: center;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }

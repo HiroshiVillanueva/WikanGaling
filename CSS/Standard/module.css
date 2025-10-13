@@ -58,14 +58,19 @@
     display: flex;
     gap: 1em;
 
+    justify-content: space-between;
     align-items: center;
+}
+
+#columnSide {
+    flex-grow: 1;
 }
 
 #formEditingHeader input {
     font-family: 'Inknut Antiqua Regular';
     border: none;
     height: min-content;
-    width: 40%;
+    width: 100%;
     font-size: larger;
 
     user-select: none;
@@ -107,6 +112,8 @@
     background-color: white;
     padding: 0 1em 1em 1em;
     margin: 1em 1em 0 1em !important;
+    overflow-y: scroll;
+    height: calc(100vh - 12em);
 }
 
 

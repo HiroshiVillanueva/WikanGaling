@@ -198,25 +198,16 @@ function BareListApp() {
                 const totalCorrect = attempt.attempt_data?.total_correct || 0;
                 const totalQuestions = attempt.attempt_data?.total_questions || 0;
                 
-                return {
-                    studentName,
-                    score,
-                    totalCorrect,
-                    totalQuestions
-                };
+                return { studentName, score, totalCorrect, totalQuestions };
             });
 
             // Update state to show the modal with the fetched data
-            setModalData({ 
-                title: moduleTitle, 
-                attempts: structuredAttempts 
-            });
-
+            setModalData({ title: moduleTitle, attempts: structuredAttempts });
         } catch (err) {
             console.error("Error fetching attempt details:", err);
             // Show error in an alert and close the modal state
             alert(`Failed to load attempts for ${moduleTitle}. Error: ${err.message}`);
-            setModalData(null); 
+            setModalData(null);
         }
     };
 
@@ -225,25 +216,51 @@ function BareListApp() {
         setModalData(null);
     };
 
-
-    // Check for active session and load forms
+    // Primary Effect for handling Supabase Authentication State changes (Login/Logout & Redirect).
+    // Logic transferred from app.js
     React.useEffect(() => {
-        supabase.auth.getSession()
-            .then(({ data: { session } }) => {
-                if (session && session.user) {
-                    setHasSession(true);
-                    loadFormsList(session.user.id);
-                } else {
-                    setLoading(false);
+        
+        // Function to check session, load data, or redirect to login
+        const checkSessionAndRedirect = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            // Set the session state (using hasSession in this component)
+            setHasSession(!!session); //
+
+            if (!session) {
+                // No session found: Redirect to the dedicated login page
+                setLoading(false); // Stop loading UI before redirect
+                window.location.href = 'login.html'; //
+            } else {
+                // Session exists: Proceed to load data
+                // loadFormsList handles setLoading(false) in its finally block
+                loadFormsList(session.user.id); 
+            }
+        };
+
+        // 1. Check session on mount (handles page reload)
+        checkSessionAndRedirect();
+
+        // 2. Subscribe to Auth Changes (handles real-time events like manual logout)
+        const { data: { subscription } = {} } = supabase.auth.onAuthStateChange(
+            (event, session) => {
+                setHasSession(!!session);
+                if (!session) {
+                    // If session is removed (e.g., manual logout), redirect
+                    window.location.href = 'login.html'; //
                 }
-            })
-            .catch(() => {
-                 setLoading(false);
-            });
-    }, []);
+            }
+        );
+
+        // Cleanup: Unsubscribe from the listener when component unmounts
+        return () => {
+            if (subscription && typeof subscription.unsubscribe === 'function') {
+                subscription.unsubscribe();
+            }
+        };
+    }, []); // Empty dependency array ensures this runs once on mount
 
     // --- Render Logic ---
-
     // Return null if loading or no valid session to fulfill "no other elements"
     if (loading || !hasSession || formsList.length === 0) {
         return null;
@@ -262,23 +279,15 @@ function BareListApp() {
                                 {form.title}
                             </a>
                             {/* Attach the new click handler, RENAMED property access */}
-                            <button onClick={() => handleShowAttempts(form.module_id, form.title)}> 
-                                SHOW ATTEMPTS
-                            </button>
+                            <button onClick={() => handleShowAttempts(form.module_id, form.title)}> SHOW ATTEMPTS </button>
                         </div>
-
-                        <p>Attempts: {form.attemptsCount}</p> 
+                        <p>Attempts: {form.attemptsCount}</p>
                     </li>
                 ))}
             </ul>
-            
             {/* RENDER THE MODAL IF modalData IS SET */}
             {modalData && (
-                <AttemptsModal 
-                    moduleTitle={modalData.title}
-                    attempts={modalData.attempts}
-                    onClose={handleCloseModal}
-                />
+                <AttemptsModal moduleTitle={modalData.title} attempts={modalData.attempts} onClose={handleCloseModal} />
             )}
         </>
     );
@@ -287,8 +296,8 @@ function BareListApp() {
 // =================================================================
 // 3. INITIAL RENDER
 // =================================================================
-
 ReactDOM.render(<BareListApp />, document.getElementById('list'));
+// =================================================================
 
 
 
@@ -453,7 +462,7 @@ function AuthToggle() {
 
     const baseStyle = { 
         fontfamily: 'Inknut Antiqua SemiBold',
-        fontSize: '14px',
+        fontSize: '16px',
         padding: '1em', 
         border: 'none', 
         cursor: 'pointer',

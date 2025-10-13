@@ -162,7 +162,7 @@ function AuthToggle() {
 
     const baseStyle = { 
         fontfamily: 'Inknut Antiqua SemiBold',
-        fontSize: '14px',
+        fontSize: '16px',
         padding: '1em', 
         border: 'none', 
         cursor: 'pointer',

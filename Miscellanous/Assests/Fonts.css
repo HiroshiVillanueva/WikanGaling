@@ -16,12 +16,12 @@
     font-family: 'Inknut Antiqua Light';
     font-style: normal;
     font-weight: normal;
-    src: local('Inknut Antiqua Light'), url('InknutAntiqua-Light.woff') format('woff');
+    src: local('Inknut Antiqua Light'), url('InknutAntiqua-Regular.woff') format('woff');
 }
 
 @font-face {
     font-family: 'Inknut Antiqua SemiBold';
     font-style: normal;
     font-weight: normal;
-    src: local('Inknut Antiqua SemiBold'), url('InknutAntiqua-SemiBold.woff') format('woff');
+    src: local('Inknut Antiqua SemiBold'), url('InknutAntiqua-Bold.woff') format('woff');
 }

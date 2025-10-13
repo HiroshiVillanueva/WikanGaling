@@ -229,7 +229,7 @@ function NotificationModal({ message, isLink, onClose }) {
 function QuestionTypeSelector({ currentType, qIndex, onTypeChange }) {
     const types = [
         { key: 'multiple_choice', label: 'Multiple Choice' },
-        { key: 'connecting_dots', label: 'Connecting Dots' },
+        { key: 'connecting_dots', label: 'Matching Types' },
         { key: 'fill_in_blanks', label: 'Fill in the Blanks' },
     ];
 
@@ -281,7 +281,7 @@ function QuestionTextAndImageForm({ question, qIndex, onUpdateItemText, onUpdate
                 <input // Use single-line input for other types
                     type="text" 
                     name="question_text" 
-                    placeholder="Text Here" 
+                    placeholder="Enter Question Text Here" 
                     value={question.text} 
                     required 
                     onChange={(e) => onUpdateItemText(qIndex, undefined, e.target.value)}
@@ -368,7 +368,7 @@ function MultipleChoiceOptions({
                                         <input 
                                             type="text" 
                                             name="option_text" 
-                                            placeholder="Text Here" 
+                                            placeholder="Enter Option Text Here" 
                                             value={option.text} 
                                             style={{ width: '200px' }} 
                                             onChange={(e) => onUpdateItemText(qIndex, oIndex, e.target.value)}
@@ -422,7 +422,7 @@ function MultipleChoiceOptions({
                 >
                     <div>
                         <button type="submit">SAVE</button>
-                        <input type="text" name="option_text" placeholder="New option text" required />
+                        <input type="text" name="option_text" placeholder="Enter New Option Text Here" required />
                     </div>
                     
                     {/* Option Image: Only for Multiple Choice (Normal file input for ADD) */}
@@ -480,7 +480,7 @@ function ConnectingDotsOptions({ question, qIndex, onUpdateItemText, onUpdateCDO
                     <input 
                         type="text" 
                         value={option.text} 
-                        placeholder="Text Here" 
+                        placeholder="Enter Option Text Here" 
                         style={{ width: '150px', marginRight: '5px' }} 
                         onChange={(e) => onUpdateItemText(qIndex, option.originalIndex, e.target.value)}
                     />
@@ -887,7 +887,7 @@ function App() {
                 };
                 
                 setFormDataAndDraft(loadedFormData);
-                setSuccess('Form loaded from Supabase Database!');
+                setSuccess('Form loaded from Database!');
                 // Remove draft now that database version is loaded
                 localStorage.removeItem(`form_data_draft_${id}`); 
             } else {
@@ -934,7 +934,7 @@ function App() {
             setFormData(newForm);
             setFormId(newFormId);
             setError('');
-            setSuccess('Form created and saved to Supabase Database!');
+            setSuccess('Form created and saved to Database!');
             window.history.pushState({}, '', `?form_id=${newFormId}`); 
         } catch (err) {
             setError('Error creating form: ' + err.message);
@@ -970,7 +970,8 @@ function App() {
                         
                         localStorage.removeItem(`form_data_draft_${formId}`);
                         
-                        setSuccess('Form saved successfully to Supabase Database!');
+                        alert("Form saved successfully!")
+                        setSuccess('Form saved successfully to Database!');
                         resolve(true); // Resolve the promise successfully
                         
                     } catch (err) {
@@ -1328,38 +1329,40 @@ function App() {
     // --- Main Application View (If logged in) ---
     return (
         <div>
-            {/* Custom Notification Modal Render */}
-            {notification.show && (
-                <NotificationModal 
-                    message={notification.message} 
-                    isLink={notification.isLink}
-                    onClose={() => setNotification({ show: false, message: '', isLink: false })}
-                />
-            )}
+            <div>
+                {/* Custom Notification Modal Render */}
+                {notification.show && (
+                    <NotificationModal 
+                        message={notification.message} 
+                        isLink={notification.isLink}
+                        onClose={() => setNotification({ show: false, message: '', isLink: false })}
+                    />
+                )}
 
-            {error && <p className="error">{error}</p>}
-            {success && <p className="success">{success}</p>}
+                {error && <p className="error">{error}</p>}
+                {success && <p className="success">{success}</p>}
 
-            <form onSubmit={handleCreateForm} id="createFormHeader">
-                <input 
-                    type="text" 
-                    name="form_title" 
-                    placeholder="New Questionnaire Name Here" 
-                    required 
-                    // Controlled input ensures this box clears on form switch
-                    value={newFormTitle} 
-                    onChange={(e) => setNewFormTitle(e.target.value)}
-                />
-                <button type="submit">CREATE FORM</button>
-            </form>
+                <form onSubmit={handleCreateForm} id="createFormHeader">
+                    <input 
+                        type="text" 
+                        name="form_title" 
+                        placeholder="Enter New Module Name Here" 
+                        required 
+                        // Controlled input ensures this box clears on form switch
+                        value={newFormTitle} 
+                        onChange={(e) => setNewFormTitle(e.target.value)}
+                    />
+                    <button type="submit">CREATE MODULE</button>
+                </form>
+            </div>
 
-            {/* Form Editor View (only visible when a form is selected) */}
+           {/* Form Editor View (only visible when a form is selected) */}
             {formId && formData.module_id && (
                 <div id="formPage" key={formId}>                    
                     {/* NEW DIV WRAPPING TITLE INPUT AND BUTTONS */}
                     <div id="formEditingHeader">
                         {/* Title Input */}
-                        <div>
+                        <div id="columnSide">
                             <input 
                                 key={formId}
                                 style={{ 
@@ -1382,7 +1385,7 @@ function App() {
                             <textarea 
                                 key={`desc-${formId}`} // Key for controlled reset on form switch
                                 name="form_description" 
-                                placeholder="A brief description for your module (optional)" 
+                                placeholder="Enter Your Optional Description of the Module Here" 
                                 rows="3"
                                 defaultValue={formData.description} 
                                 style={{ 
@@ -1407,9 +1410,9 @@ function App() {
 
                         <div>
                             {/* Renamed button to Save Draft and added handlePublishModule */}
-                            <button id="saveModule" onClick={handleSaveForm} className="save-button">SAVE DRAFT</button>
+                            <button id="saveModule" onClick={handleSaveForm} className="save-button">SAVE MODULE</button>
                             <button id="deleteModule" onClick={handleDeleteForm} className="delete-button">DELETE MODULE</button>
-                            <button id="saveModule" onClick={handlePublishModule} className="publish-button">PUBLISH</button>
+                            <button id="saveModule" onClick={handlePublishModule} className="publish-button">PUBLISH MODULE</button>
                         </div>
                     </div>
                     {/* END NEW DIV */}
@@ -1443,7 +1446,7 @@ function App() {
 
                     {/* --- Add New Question Input --- */}
                     <form onSubmit={handleAddQuestion}> 
-                        <input id="addQuestionInput" type="text" name="question_text" placeholder="Question text" required />
+                        <input id="addQuestionInput" type="text" name="question_text" placeholder="Enter New Question Text Here" required />
                         <button id="addQuestionButton" type="submit">Add Question</button>
                     </form>
                 </div>
@@ -1625,7 +1628,7 @@ function AuthToggle() {
 
     const baseStyle = { 
         fontFamily: 'Inknut Antiqua SemiBold',
-        fontSize: '14px',
+        fontSize: '16px',
         padding: '1em', 
         border: 'none', 
         cursor: 'pointer',
