@@ -721,7 +721,7 @@ function App() {
     const [session, setSession] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
     // Gets form_id from URL query params on initial load
-    const [formId, setFormId] => React.useState(new URLSearchParams(window.location.search).get('form_id') || '');
+    const [formId, setFormId] = React.useState(new URLSearchParams(window.location.search).get('form_id') || '');
     // The main object containing all form data (title, questions, options)
     const [formData, setFormData] = React.useState({}); 
     // State for the "Create New Form" input box
@@ -1731,7 +1731,7 @@ function UserFormsList() {
 
     // Render only the final unstyled list
     return (
-        <ul style={{ padding: 0}}>
+        <ul style={{ margin: '0 0 1em 0', padding: 0}}>
             {formsList.map(form => (
                 // Use module_id for key and link
                 <li key={form.module_id}> 

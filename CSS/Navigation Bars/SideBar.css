@@ -165,5 +165,7 @@ h2 {
     text-align: center;
 }
 
+#forms-list-container {overflow-y: scroll !important;}
+
 #SidebarContext i { color: rgb(117, 108, 108); }
 /* CSS for the bottom-most links */
