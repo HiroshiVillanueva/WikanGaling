@@ -571,8 +571,6 @@ function ConnectingDotsOptions({ question, qIndex, onUpdateItemText, onUpdateCDO
                                 }}
                             />
                         </label>
-                        {/* --- END OF CUSTOM FILE INPUT DISPLAY --- */}
-
                         <button class="questionImageButtonConnecterDots" type="submit">Import Image</button>
                     </div>
                 </form>
@@ -723,7 +721,7 @@ function App() {
     const [session, setSession] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
     // Gets form_id from URL query params on initial load
-    const [formId, setFormId] = React.useState(new URLSearchParams(window.location.search).get('form_id') || '');
+    const [formId, setFormId] => React.useState(new URLSearchParams(window.location.search).get('form_id') || '');
     // The main object containing all form data (title, questions, options)
     const [formData, setFormData] = React.useState({}); 
     // State for the "Create New Form" input box
@@ -739,13 +737,22 @@ function App() {
     const [showLoginModal, setShowLoginModal] = React.useState(false);
 
     // ADD THIS NEW STATE
-    const [showSavingModal, setShowSavingModal] = React.useState(false); // <--- ADD THIS
+    const [showSavingModal, setShowSavingModal] = React.useState(false); 
+    
+    // >>> START OF CHANGES FOR WARNING ALERT <<<
+    const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false); // <-- 1. NEW STATE: The boolean flag
+    const hasUnsavedChangesRef = React.useRef(false); // <-- NEW REF to track the state for event listener
+    // >>> END OF CHANGES FOR WARNING ALERT <<<
 
 
     // --- State & Draft Helpers ---
     /** Updates the main formData state and saves the current state to local storage as a draft. */
     const setFormDataAndDraft = (newFormData) => {
         setFormData(newFormData);
+        
+        // CRITICAL CHANGE: Set the flag to true on any data change (input, button press that modifies content)
+        setHasUnsavedChanges(true); 
+
         // Use module_id for local storage keying
         if (newFormData && newFormData.module_id && Object.keys(newFormData).length > 0) {
             localStorage.setItem(`form_data_draft_${newFormData.module_id}`, JSON.stringify(newFormData));
@@ -815,6 +822,13 @@ function App() {
 
     // --- Effects (Hooks) ---
     
+    // >>> START OF CHANGES FOR WARNING ALERT <<<
+    // Side effect to keep the ref updated with the latest state
+    React.useEffect(() => {
+        hasUnsavedChangesRef.current = hasUnsavedChanges;
+    }, [hasUnsavedChanges]);
+    // >>> END OF CHANGES FOR WARNING ALERT <<<
+
     /** Effect to clear the "Create New Form" text box when a user switches to editing an existing form. */
     React.useEffect(() => {
         if (formId) {
@@ -852,7 +866,7 @@ function App() {
         };
 
         // ----------------------------------------------------
-        // AUTOSAVE HANDLERS
+        // AUTOSAVE / WARNING HANDLERS
         // ----------------------------------------------------
 
         // Handler for when the tab/window loses focus
@@ -865,11 +879,23 @@ function App() {
             }
         };
 
+        // >>> START OF CHANGES FOR WARNING ALERT <<<
         // Handler for when the user attempts to close the window or navigate away
         const handleBeforeUnload = (event) => {
-            saveFormRef.current();
-            console.log('Autosave triggered on page close/reload.');
+            // CRITICAL CHANGE: Check the flag via the ref. If true, show warning and skip autosave.
+            if (hasUnsavedChangesRef.current) {
+                // Display the standard browser warning alert
+                event.preventDefault(); // For older browsers
+                event.returnValue = ''; // Required for the prompt to show in modern browsers
+                console.log('Warning alert triggered due to unsaved changes.');
+            } else {
+                // If no unsaved changes, still perform the final autosave for safety
+                saveFormRef.current();
+                console.log('Autosave triggered on page close/reload (no warning shown).');
+            }
         };
+        // >>> END OF CHANGES FOR WARNING ALERT <<<
+
 
         // ----------------------------------------------------
         // 1. Initial Check & Session Subscription
@@ -1072,7 +1098,7 @@ function App() {
         // Use a 50ms timeout to ensure React state updates (from inputs) finalize
         return new Promise((resolve) => {
             // New logic: Show the saving modal immediately
-            setShowSavingModal(true); // <--- ADD THIS
+            setShowSavingModal(true); 
 
             setTimeout(async () => { 
                 const latestFormData = formData; 
@@ -1099,8 +1125,11 @@ function App() {
                         
                         localStorage.removeItem(`form_data_draft_${formId}`);
                         
+                        // CRITICAL CHANGE: Reset the flag to false upon successful save
+                        setHasUnsavedChanges(false);
+
                         // New logic: Hide modal and set success message
-                        setShowSavingModal(false); // <--- MODIFIED
+                        setShowSavingModal(false); 
                         
                         // Only show success message for manual saves, not for silent autosaves
                         if (document.visibilityState === 'visible') {
@@ -1111,13 +1140,13 @@ function App() {
                         
                     } catch (err) {
                         // New logic: Hide modal on error
-                        setShowSavingModal(false); // <--- ADDED
+                        setShowSavingModal(false); 
                         setError('Error saving form: ' + err.message);
                         resolve(false); // Resolve the promise with failure
                     }
                 } else {
                     // New logic: Hide modal if save conditions not met
-                    setShowSavingModal(false); // <--- ADDED
+                    setShowSavingModal(false); 
                     resolve(false); // Resolve with failure if conditions aren't met
                 }
             }, 50);
@@ -1176,6 +1205,8 @@ function App() {
                     localStorage.removeItem(`form_data_draft_${formId}`);
                     setFormId('');
                     setFormData({});
+                    // CRITICAL CHANGE: Reset the flag after deletion
+                    setHasUnsavedChanges(false);
                     setSuccess('Form and all associated files deleted successfully!');
                     window.history.pushState({}, '', '?'); // Clear form_id from URL
                 } catch (err) {
@@ -1481,7 +1512,7 @@ function App() {
     return (
         <div>
             {/* RENDER THE SAVING MODAL HERE */}
-            {showSavingModal && e(SavingModal)} {/* <--- ADD THIS */}
+            {showSavingModal && e(SavingModal)} 
 
             <div>
                 {/* Custom Notification Modal Render */}
