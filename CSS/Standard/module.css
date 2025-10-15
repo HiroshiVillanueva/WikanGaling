@@ -200,6 +200,11 @@ input[type="file"]::file-selector-button {
     font-size: x-small !important;
     color: black;
     background-color: #42c79800 !important;
+
+    border: dashed 1px black;
+    padding: 0.5em 1.2em;
+    border-radius: 4px;
+    margin: 2px 0;
 }
 
 .optionImageGroup {
@@ -249,6 +254,7 @@ input[type="file"]::file-selector-button {
 
     cursor: pointer;
 }
+
 
 .optionbuttonGroup:hover {
     filter: brightness(120%);
@@ -426,13 +432,13 @@ input[type="file"]::file-selector-button {
 }
 
 .removePair {
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-family: 'Inknut Antiqua bold' !important;
     font-size: xx-small !important;
     background-color: rgba(236, 236, 236, 0) !important;   
     border: solid 2px black;
     border-radius: 6px;
     line-height: 0.65em;
-    padding: 0.5em 0.6em;
+    padding: 0.8em 0.6em 0.5em 0.6em;
     cursor: pointer;
 }
 
@@ -509,8 +515,8 @@ input[type="file"]::file-selector-button {
     cursor: pointer;
 }
 
-.discard {
-    font-family: 'Inknut Antiqua bold';
+.Discard {
+    font-family: 'Inknut Antiqua bold' !important;
     font-size: xx-small !important;
     background-color: rgba(236, 236, 236, 0) !important;   
     border: solid 2px black;
@@ -521,4 +527,4 @@ input[type="file"]::file-selector-button {
     color: black !important;
 }
 
-.discard:hover {background-color: rgb(255, 255, 255) !important; }
+.Discard:hover {background-color: rgb(255, 255, 255) !important; }

@@ -175,6 +175,47 @@ const getFilenameFromPath = (filePath) => {
 };
 
 
+
+// =================================================================
+// NEW: SAVING MODAL COMPONENT
+// =================================================================
+
+/**
+ * A simple non-blocking modal component to indicate saving is in progress.
+ */
+function SavingModal() {
+    const modalStyle = {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.4)', // Slightly transparent background
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10001, // Ensure it's above other modals like LoginRequiredModal (10000)
+    };
+
+    const contentStyle = {
+        backgroundColor: 'white',
+        padding: '20px 40px',
+        borderRadius: '8px',
+        textAlign: 'center',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    };
+    
+    // Use React.createElement for consistency with the LoginRequiredModal
+    return e('div', { style: modalStyle },
+        e('div', { style: contentStyle },
+            e('h2', { style: { color: '#009DFF' } }, 'Saving Module...'),
+            e('p', { style: { color: 'black' } }, 'Please wait, your data is being synced.')
+        )
+    );
+}
+
+
+
 // =================================================================
 // 3. REACT COMPONENTS
 // =================================================================
@@ -343,43 +384,6 @@ function QuestionTextAndImageForm({ question, qIndex, onUpdateItemText, onUpdate
                     onChange={(e) => onUpdateItemText(qIndex, undefined, e.target.value)}
                 />
             )}
-            
-            {/* Only allow question image upload for multiple choice */}
-            {question.type === 'multiple_choice' && (
-                <> {/* Fragment for grouping elements */}                   
-                    {/* --- START OF CUSTOM FILE INPUT DISPLAY --- */}
-                    <div class="questionImagePackage">
-                        <label htmlFor={uniqueId} 
-                        class="optionImage"
-                        style={{ 
-                            margin: '0 1em',
-                            cursor: 'pointer',
-                            fontSize: 'small'
-                        }}>
-                            {filename}
-                            {/* Hidden actual file input */}
-                            <input
-                                type="file" 
-                                name="question_image" 
-                                id={uniqueId} 
-                                accept="image/*" 
-                                style={{
-                                    position: 'absolute',
-                                    width: '1px',
-                                    height: '1px',
-                                    padding: '0',
-                                    margin: '-1px',
-                                    overflow: 'hidden',
-                                    clip: 'rect(0, 0, 0, 0)',
-                                    border: '0',
-                                }}
-                            />
-                        </label>
-                        {/* --- END OF CUSTOM FILE INPUT DISPLAY --- */}
-                        <button class="questionImageButton" type="submit">Import Image</button>
-                    </div>
-                </>
-            )}
         </form>
     );
 }
@@ -458,12 +462,12 @@ function MultipleChoiceOptions({
 
                                     {/* --- BUTTONS MOVED BEFORE INPUT (Previous change) --- */}
                                         {question.correct === oIndex ? (
-                                            <button class="optionbuttonGroup setCorrect">SET</button>
+                                            <button class="optionbuttonGroup setCorrect">CORRECT</button>
                                         ) : (
-                                            <button class="optionbuttonGroup" onClick={() => onSetCorrect(qIndex, oIndex)}>SET</button>
+                                            <button class="optionbuttonGroup" onClick={() => onSetCorrect(qIndex, oIndex)}>CORRECT</button>
                                         )}
-                                
-                                        <button class="optionbuttonGroup" style={{ backgroundColor: '#ca7b7cff' }}  onClick={() => onRemoveOption(qIndex, oIndex)}>X</button>
+                            
+                                        <button class="Discard"  onClick={() => onRemoveOption(qIndex, oIndex)}>X</button>
                                         {/* --- END BUTTONS --- */}
                                 </li>
                             );
@@ -733,6 +737,9 @@ function App() {
     
     // NEW STATE: For the login required modal
     const [showLoginModal, setShowLoginModal] = React.useState(false);
+
+    // ADD THIS NEW STATE
+    const [showSavingModal, setShowSavingModal] = React.useState(false); // <--- ADD THIS
 
 
     // --- State & Draft Helpers ---
@@ -1064,6 +1071,9 @@ function App() {
     const handleSaveForm = async () => {
         // Use a 50ms timeout to ensure React state updates (from inputs) finalize
         return new Promise((resolve) => {
+            // New logic: Show the saving modal immediately
+            setShowSavingModal(true); // <--- ADD THIS
+
             setTimeout(async () => { 
                 const latestFormData = formData; 
                 
@@ -1089,18 +1099,25 @@ function App() {
                         
                         localStorage.removeItem(`form_data_draft_${formId}`);
                         
+                        // New logic: Hide modal and set success message
+                        setShowSavingModal(false); // <--- MODIFIED
+                        
                         // Only show success message for manual saves, not for silent autosaves
                         if (document.visibilityState === 'visible') {
-                            alert("Form saved successfully!")
+                            // alert("Form saved successfully!") // <--- REMOVED
                             setSuccess('Form saved successfully to Database!');
                         }
                         resolve(true); // Resolve the promise successfully
                         
                     } catch (err) {
+                        // New logic: Hide modal on error
+                        setShowSavingModal(false); // <--- ADDED
                         setError('Error saving form: ' + err.message);
                         resolve(false); // Resolve the promise with failure
                     }
                 } else {
+                    // New logic: Hide modal if save conditions not met
+                    setShowSavingModal(false); // <--- ADDED
                     resolve(false); // Resolve with failure if conditions aren't met
                 }
             }, 50);
@@ -1463,6 +1480,9 @@ function App() {
     // --- Main Application View (If logged in) ---
     return (
         <div>
+            {/* RENDER THE SAVING MODAL HERE */}
+            {showSavingModal && e(SavingModal)} {/* <--- ADD THIS */}
+
             <div>
                 {/* Custom Notification Modal Render */}
                 {notification.show && (
