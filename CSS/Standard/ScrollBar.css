@@ -1,6 +1,6 @@
 /* Overall scrollbar track */
 ::-webkit-scrollbar {
-    width: 4px; /* Width for vertical scrollbar */
+    width: 6px; /* Width for vertical scrollbar */
     height: 10px; /* Height for horizontal scrollbar */
     background: #cbcbcb00;
 }

@@ -92,6 +92,21 @@ function AttemptsModal({ moduleTitle, attempts, onClose }) {
         border: 'solid 1px black',
     };
 
+    // Helper function to format the timestamp
+    const formatTimestamp = (timestamp) => {
+        if (!timestamp) return 'N/A';
+        // Options for a readable date/time format
+        const options = { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        };
+        // Use the built-in Date object to parse and format the ISO string
+        return new Date(timestamp).toLocaleDateString(undefined, options);
+    };
+
     return (
         <div style={modalStyle}>
             <div style={contentStyle}>
@@ -112,12 +127,71 @@ function AttemptsModal({ moduleTitle, attempts, onClose }) {
                                         <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Student: {attempt.studentName}</li>
                                         <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Score: {attempt.score}%</li>
                                         <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Correct: {attempt.totalCorrect} / {attempt.totalQuestions}</li>
+                                        {/* Display the formatted timestamp */}
+                                        <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Time: {formatTimestamp(attempt.createdAt)}</li> 
                                     </ul>
                                 </div>
                             ))}
                         </>
                     )}
                 </div>
+            </div>
+        </div>
+    );
+}
+
+// =================================================================
+// NEW: LOGIN REQUIRED MODAL COMPONENT
+// =================================================================
+
+/**
+ * A simple modal component to inform the user they need to log in before redirecting.
+ * @param {function} onRedirect - Function to call when the user clicks the login button.
+ */
+function LoginRequiredModal({ onRedirect }) {
+    // Basic styling for the modal overlay and content
+    const modalStyle = {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(72, 76, 81, 0.7)', // Darker overlay
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10000, // Higher zIndex to ensure it's on top
+        color: 'black',
+    };
+
+    const contentStyle = {
+        backgroundColor: 'white',
+        padding: '30px',
+        borderRadius: '8px',
+        width: '400px',
+        textAlign: 'center',
+    };
+    
+    const buttonStyle = {
+        fontFamily: 'Inknut Antiqua SemiBold',
+        backgroundColor: 'black', 
+        color: 'white',
+        cursor: 'pointer',
+        border: 'none',
+        borderRadius: '5px',
+        padding: '10px 20px',
+        marginTop: '20px',
+        fontSize: '16px',
+    };
+
+    return (
+        <div style={modalStyle}>
+            <div style={contentStyle}>
+                <h2>Login Required</h2>
+                <p style={{color: 'black'}}>You must be logged in to view the dashboard.</p>
+                <button style={buttonStyle} onClick={onRedirect}>
+                    Go to Login Page
+                </button>
             </div>
         </div>
     );
@@ -135,6 +209,9 @@ function BareListApp() {
     // NEW STATE: To control the modal visibility and content
     // Format: { title: string, attempts: array | null }
     const [modalData, setModalData] = React.useState(null); 
+    
+    // NEW STATE: To control the Login Required modal visibility
+    const [showLoginModal, setShowLoginModal] = React.useState(false);
 
     // Function to load the forms list and their attempt counts
     const loadFormsList = async (uid) => {
@@ -180,8 +257,9 @@ function BareListApp() {
             // Fetch attempt data, and join to get the student name using the foreign key relationship
             const { data: attemptsData, error } = await supabase
                 .from(ATTEMPTS_TABLE)
-                // FIX: Select the 'attempt_data' column directly since it was renamed in the DB.
+                // Include 'created_at' and join to get the student name
                 .select(`
+                    createdAt, 
                     attempt_data,
                     ${STUDENTS_TABLE} ( Display_name ) 
                 `)
@@ -198,7 +276,11 @@ function BareListApp() {
                 const totalCorrect = attempt.attempt_data?.total_correct || 0;
                 const totalQuestions = attempt.attempt_data?.total_questions || 0;
                 
-                return { studentName, score, totalCorrect, totalQuestions };
+                // FIX: Extract the created_at timestamp directly from the attempt object
+                const createdAt = attempt.createdAt; 
+
+                // Include createdAt in the return object
+                return { studentName, score, totalCorrect, totalQuestions, createdAt };
             });
 
             // Update state to show the modal with the fetched data
@@ -216,8 +298,12 @@ function BareListApp() {
         setModalData(null);
     };
 
+    // NEW FUNCTION: Handler for the login redirect button (passed to LoginRequiredModal)
+    const handleLoginRedirect = () => {
+        window.location.href = 'login.html'; 
+    };
+
     // Primary Effect for handling Supabase Authentication State changes (Login/Logout & Redirect).
-    // Logic transferred from app.js
     React.useEffect(() => {
         
         // Function to check session, load data, or redirect to login
@@ -225,12 +311,12 @@ function BareListApp() {
             const { data: { session } } = await supabase.auth.getSession();
             
             // Set the session state (using hasSession in this component)
-            setHasSession(!!session); //
+            setHasSession(!!session); 
 
             if (!session) {
-                // No session found: Redirect to the dedicated login page
-                setLoading(false); // Stop loading UI before redirect
-                window.location.href = 'login.html'; //
+                // No session found: Show the modal instead of redirecting immediately
+                setLoading(false); // Stop loading UI
+                setShowLoginModal(true); // Show the Login Required modal
             } else {
                 // Session exists: Proceed to load data
                 // loadFormsList handles setLoading(false) in its finally block
@@ -246,8 +332,8 @@ function BareListApp() {
             (event, session) => {
                 setHasSession(!!session);
                 if (!session) {
-                    // If session is removed (e.g., manual logout), redirect
-                    window.location.href = 'login.html'; //
+                    // If session is removed (e.g., manual logout), show modal
+                    setShowLoginModal(true);
                 }
             }
         );
@@ -261,9 +347,15 @@ function BareListApp() {
     }, []); // Empty dependency array ensures this runs once on mount
 
     // --- Render Logic ---
-    // Return null if loading or no valid session to fulfill "no other elements"
-    if (loading || !hasSession || formsList.length === 0) {
-        return null;
+    
+    // RENDER NEW MODAL FIRST if authentication is required
+    if (showLoginModal) {
+        return <LoginRequiredModal onRedirect={handleLoginRedirect} />;
+    }
+
+    // Return null if loading or no valid session (which means no forms)
+    if (loading || formsList.length === 0) {
+        return <span style={{marginLeft: "8em", fontFamily: "Inknut Antiqua Regular"}}>No Modules Present in Account.</span>;
     }
 
     // Render the pure unstyled list (UL) and the modal component
@@ -279,13 +371,17 @@ function BareListApp() {
                                 {form.title}
                             </a>
                             {/* Attach the new click handler, RENAMED property access */}
-                            <button onClick={() => handleShowAttempts(form.module_id, form.title)}> SHOW ATTEMPTS </button>
+                            <div class="dashboardButtons">
+                                <button class="dashButtonsActual" onClick={() => handleShowAttempts(form.module_id, form.title)}> SHOW ATTEMPTS </button>
+                                <button class="dashButtonsActualnone"> <a class="dashButtonsActualempty" href={`https://wikan-galing-student-side.vercel.app?form_id=${form.module_id}`}>OPEN MODULE</a> </button>
+                                <button class="dashButtonsActualnone"> <a class="dashButtonsActualempty" href={`module.html?form_id=${form.module_id}`}>OPEN EDITOR</a> </button>
+                            </div>
                         </div>
                         <p>Attempts: {form.attemptsCount}</p>
                     </li>
                 ))}
             </ul>
-            {/* RENDER THE MODAL IF modalData IS SET */}
+            {/* RENDER THE ATTEMPTS MODAL IF modalData IS SET */}
             {modalData && (
                 <AttemptsModal moduleTitle={modalData.title} attempts={modalData.attempts} onClose={handleCloseModal} />
             )}
@@ -371,7 +467,7 @@ function UserFormsList() {
     
     // Check if the user is logged in (formsList will be null only if something went wrong)
     if (!formsList || formsList.length === 0) {
-        return <span style={{ color: '#888' }}>Empty</span>;
+        return <span style={{ color: '#ffffffff !important' }}>Empty</span>;
     }
 
     // Render only the final unstyled list

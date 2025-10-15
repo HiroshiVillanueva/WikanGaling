@@ -4,7 +4,7 @@
     color: #ffffff;
     list-style: none;
 
-    /* transition: all ease-in-out 0.05s; */
+    transition: all ease-in-out 0.05s;
 
     box-sizing: border-box;
     object-fit: contain;

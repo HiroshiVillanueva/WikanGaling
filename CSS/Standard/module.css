@@ -1,8 +1,8 @@
 #createFormHeader {
-    padding: 0.5em 2em;
+    padding: 0.3em 2em;
     background-color: white;
-    width:  50dvw;
-    margin: 1em auto 1em 1em;
+    width:  60dvw;
+    margin: 0em auto 1em 1em;
     box-shadow: 0 0 3px 1px rgba(0, 0, 0, 0.066);
 
     display: flex;
@@ -25,7 +25,7 @@
     font-family: 'Inknut Antiqua Regular';
     background-color: black;
     color: white !important;
-    padding: 0 2em;
+    padding: 0.5em 2em;
 
     border-radius: 8px;
     border: solid 2px black;
@@ -48,7 +48,14 @@
     font-size: small;
     font-family: 'Inknut Antiqua Light';
     line-height: 1em;
-    margin: 1em;
+    margin: 0 1em;
+}
+
+
+
+#buttonsModules {
+    display: grid;
+    margin: 0 4em;
 }
 
 
@@ -66,6 +73,10 @@
     flex-grow: 1;
 }
 
+#columnSide div {
+    display: flex;
+}
+
 #formEditingHeader input {
     font-family: 'Inknut Antiqua Regular';
     border: none;
@@ -78,31 +89,25 @@
     background-color: rgba(0, 0, 0, 0); 
 }
 
-#formEditingHeader div #deleteModule, #saveModule {
+#formEditingHeader div #deleteModule, #saveModule, #publishModule {
     font-family: 'Inknut Antiqua Light';
-    padding: 0 1.2em;
-    margin: 1.5em 0 1em 1.5em;
+    padding: 0.15em 1em;
+    margin: 0.5em 0.5em;
     color: white !important;
+    background-color: #000000;
 
-    border: none;
+    width: 20em;
+
+    border: solid 2px black;
     border-radius: 8px;
     cursor: pointer;
 }
 
-#saveModule{background-color: #47B991;}
-#deleteModule{background-color: #B94747;}
-
-#saveModule:hover {
+#deleteModule:hover, #saveModule:hover, #publishModule:hover {
     text-shadow: 0 0 3px 0 white;
     box-shadow: 0 0 3px 0 rgb(223, 253, 233);
-    background-color: #42c798;
-}
-
-
-#deleteModule:hover {
-    text-shadow: 0 0 3px 0 white;
-    box-shadow: 0 0 3px 0 rgb(255, 195, 195);
-    background-color: #cd4a4a;
+    color: black !important;
+    background-color: #ffffff !important;
 }
 
 
@@ -111,15 +116,21 @@
 #formPage {
     background-color: white;
     padding: 0 1em 1em 1em;
-    margin: 1em 1em 0 1em !important;
+    margin: 0em 1em 0 1em !important;
+    max-height: calc(100vh - 9.5em);
+}
+
+#formPageSub {
+    position: relative;
+    margin-bottom: 0.5em;
     overflow-y: scroll;
-    height: calc(100vh - 12em);
+    max-height: calc(100vh - 20em);
 }
 
 
 .question {
     background-color: #E5F5FF;
-    margin: 1em 2.5em;
+    margin: 0em 2.5em 1em 2.5em;
 
     border: none !important;
     border-radius: 4px;
@@ -133,6 +144,7 @@
     border: none;
     width: 100%;
     background-color: #e5f5ff00;
+    margin-bottom: 0.5em;
 }
 
 .questionHeader textarea {
@@ -157,7 +169,7 @@ input[type="file"]::file-selector-button {
     width: max-content;
     background-color: #85B5D4;
     border: 0;
-    padding: 0em 1em;
+    padding: 0.5em 1em;
     border-radius: 8px;
 }
 
@@ -190,12 +202,17 @@ input[type="file"]::file-selector-button {
     background-color: #42c79800 !important;
 }
 
+.optionImageGroup {
+    display: flex;
+    align-items: center;
+}
+
 .optionImageGroup button {
     font-family: 'Inknut Antiqua Regular';
     width: max-content;
     background-color: #85B5D4;
     border: 0;
-    padding: 0em 1em;
+    padding: 0.5em 1em;
     border-radius: 8px;
     float: right;
 }
@@ -208,6 +225,7 @@ input[type="file"]::file-selector-button {
 
 .optionImageGroup label {
     margin-left: auto;
+    align-self: center;
 }
 
 .valueOptionGroup {
@@ -216,25 +234,28 @@ input[type="file"]::file-selector-button {
     gap: 0.3em;
 }
 
-.valueOptionGroup button {
+.optionbuttonGroup {
     font-family: 'Inknut Antiqua Light';
-    line-height: 0;
+    line-height: 1em;
 
     color: white !important;
     background-color: #919191;
     border: 0;
-    padding: 0em 1.3em;
-    border-radius: 8px;
+    padding: 0.4em 0.8em;
+    margin: 0.3em;
+    border-radius: 7px;
+
+    text-align: center;
 
     cursor: pointer;
 }
 
-.valueOptionGroup button:hover {
+.optionbuttonGroup:hover {
     filter: brightness(120%);
     box-shadow: inset 0 0 3px 0 rgba(0, 0, 0, 0.135);
 }
 
-.valueOptionGroup .setCorrect {
+.setCorrect {
     background-color: #42c798;
 }
 
@@ -248,17 +269,16 @@ input[type="file"]::file-selector-button {
 }
 
 .removeQuestion { 
-    font-family: 'Inknut Antiqua Light';
-    background-color: rgba(236, 236, 236, 0);   
+    font-family: 'Inknut Antiqua bold';
+    background-color: rgba(255, 255, 255, 0);   
     border: solid 2px black;
     border-radius: 8px;
-    line-height: 1em;
+    line-height: 0.8em;
     padding: 0.5em 0.6em;
 }
 
 .removeQuestion:hover {
     cursor: pointer;
-    box-shadow: inset 0 0 2px 0 rgba(0, 0, 0, 0.25);
     background-color: rgb(255, 255, 255); 
 }
 
@@ -269,13 +289,16 @@ input[type="file"]::file-selector-button {
 }
 
 .question-type-selector {
-    margin: 1em 0 0 0;
+    margin: 0em 0 1em 0;
     display: flex;
-    justify-content: end;
+    justify-content: start;
+
+    border-bottom: solid 1px black;
 }
 
 .question-type-selector button{
     font-family: 'Inknut Antiqua Light';
+    padding: 0.5em 0;
     cursor: pointer;
 }
 
@@ -298,10 +321,12 @@ input[type="file"]::file-selector-button {
     font-family: 'Inknut Antiqua Light';
     line-height: 1.5em;
 
+    width: 153px;
+
     color: white !important;
     background-color: #009DFF;
     border: 0;
-    margin: 1em 8em 1em 0;
+    margin: 1em 1em 1em 0;
     padding: 0.1em 1.3em;
     border-radius: 8px;
 }
@@ -324,6 +349,8 @@ input[type="file"]::file-selector-button {
 .addOptiongroup input[type="file"] {
     font-family: 'Inknut Antiqua Light';
     font-size: x-small;
+
+    width: min-content;
 
     margin-right: 8px;
     cursor: pointer;
@@ -355,16 +382,21 @@ input[type="file"]::file-selector-button {
 
 #addQuestionButton {
     font-family: 'Inknut Antiqua Light';
-    padding: 0 1.2em;
+    padding: 0.4em 1.2em;
     color: white !important;
-    background-color: #47B991;
+    background-color: #000000;
+    border: solid 2px black !important;
 
     border: none;
     border-radius: 8px;
     cursor: pointer;
 }
 
-#addQuestionButton:hover {background-color: #44ca9b;}
+#addQuestionButton:hover {
+    background-color: #ffffff;
+    border: solid 2px black;
+    color: black !important;
+}
 
 .pair {
     display: flex;
@@ -394,16 +426,17 @@ input[type="file"]::file-selector-button {
 }
 
 .removePair {
-    font-family: 'Inknut Antiqua Light';
-    line-height: 1.7em;
-
-    color: white !important;
-    border: 0;
-    padding: 0em 1.3em;
-    border-radius: 8px;
-
-    cursor: pointer;  
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-size: xx-small !important;
+    background-color: rgba(236, 236, 236, 0) !important;   
+    border: solid 2px black;
+    border-radius: 6px;
+    line-height: 0.65em;
+    padding: 0.5em 0.6em;
+    cursor: pointer;
 }
+
+.removePair:hover {background-color: rgb(255, 255, 255) !important;}
 
 .questionImageButtonConnecterDots {
     font-family: 'Inknut Antiqua Regular';
@@ -411,7 +444,7 @@ input[type="file"]::file-selector-button {
     color: black !important;
     background-color: #85B5D4;
     border: 0;
-    padding: 0em 1em;
+    padding: 0.5em 1em;
     border-radius: 8px;
 }
 
@@ -437,8 +470,14 @@ input[type="file"]::file-selector-button {
     background-color: #009DFF;
     border: 0;
     margin: 1em;
-    padding: 0.1em 1.3em;
-    border-radius: 8px;    
+    padding: 0.1em 3em;
+    border-radius: 8px;  
+    
+    cursor: pointer;
+}
+
+.addOptionConnectingDots button:hover {
+    filter: brightness(110%);
 }
 
 .addQuestionPair {
@@ -469,3 +508,17 @@ input[type="file"]::file-selector-button {
 
     cursor: pointer;
 }
+
+.discard {
+    font-family: 'Inknut Antiqua bold';
+    font-size: xx-small !important;
+    background-color: rgba(236, 236, 236, 0) !important;   
+    border: solid 2px black;
+    border-radius: 6px;
+    line-height: 1em;
+    padding: 0.5em 0.6em;
+    cursor: pointer;
+    color: black !important;
+}
+
+.discard:hover {background-color: rgb(255, 255, 255) !important; }

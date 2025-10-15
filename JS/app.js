@@ -25,6 +25,62 @@ const imageUrlCache = {};
 // Student-side application URL base
 const STUDENT_APP_URL_BASE = "https://wikan-galing-student-side.vercel.app/?form_id="; 
 
+// Convenience for non-JSX rendering in modular components
+const e = React.createElement; 
+
+
+// =================================================================
+// NEW: LOGIN REQUIRED MODAL COMPONENT
+// =================================================================
+
+/**
+ * A simple modal component to inform the user they need to log in before redirecting.
+ * @param {function} onRedirect - Function to call when the user clicks the login button.
+ */
+function LoginRequiredModal({ onRedirect }) {
+    const modalStyle = {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(72, 76, 81, 0.7)', 
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10000, 
+        color: 'black',
+    };
+
+    const contentStyle = {
+        backgroundColor: 'white',
+        padding: '30px',
+        borderRadius: '8px',
+        width: '400px',
+        textAlign: 'center',
+    };
+    
+    const buttonStyle = {
+        fontFamily: 'Inknut Antiqua SemiBold',
+        backgroundColor: 'black', 
+        color: 'white',
+        cursor: 'pointer',
+        border: 'none',
+        borderRadius: '5px',
+        padding: '10px 20px',
+        marginTop: '20px',
+        fontSize: '16px',
+    };
+
+    // Use React.createElement for consistency if other modular components do
+    return e('div', { style: modalStyle },
+        e('div', { style: contentStyle },
+            e('h2', null, 'Login Required'),
+            e('p', { style: {color: 'black'} }, 'You must be logged in to access the Module Editor.'),
+            e('button', { style: buttonStyle, onClick: onRedirect }, 'Go to Login Page')
+        )
+    );
+}
 
 // =================================================================
 // 2. HELPER FUNCTIONS (Outside of App component)
@@ -240,8 +296,8 @@ function QuestionTypeSelector({ currentType, qIndex, onTypeChange }) {
                     key={type.key}
                     onClick={() => onTypeChange(qIndex, type.key)}
                     style={{ 
-                        margin: '0 1em', 
-                        padding: '0 1.5em',
+                        margin: '0 1em 0.8em 1em', 
+                        padding: '0.5em 1.5em',
                         backgroundColor: currentType === type.key ? '#009DFF' : '#81C5EF',
                         color: currentType === type.key ? 'white' : 'black',
                         border: '1px solid #cccccc01',
@@ -354,16 +410,7 @@ function MultipleChoiceOptions({
 
                             return (
                                 <li key={oIndex} className="option">
-                                    <div class="valueOptionGroup">
-                                        {/* --- BUTTONS MOVED BEFORE INPUT (Previous change) --- */}
-                                        <button style={{ backgroundColor: '#FF5255' }}  onClick={() => onRemoveOption(qIndex, oIndex)}>REMOVE</button>
-                                        {question.correct === oIndex ? (
-                                            <button class="setCorrect">SET</button>
-                                        ) : (
-                                            <button onClick={() => onSetCorrect(qIndex, oIndex)}>SET</button>
-                                        )}
-                                        {/* --- END BUTTONS --- */}
-                                        
+                                    <div class="valueOptionGroup">                                       
                                         {/* Option Text Input (Controlled Component) */}
                                         <input 
                                             type="text" 
@@ -376,7 +423,7 @@ function MultipleChoiceOptions({
                                     </div>
                                     {/* Option Image: Only for Multiple Choice */}
                                     {isMultipleChoice && (
-                                        <form class="optionImageGroup" style={{ display: 'inline-block', margin: '0 10px' }} onSubmit={(e) => onUpdateOption(e, qIndex, oIndex)} encType="multipart/form-data">
+                                        <form class="optionImageGroup" onSubmit={(e) => onUpdateOption(e, qIndex, oIndex)} encType="multipart/form-data">
                                             
                                             {/* --- START OF CUSTOM FILE INPUT DISPLAY --- */}
                                             <label htmlFor={uniqueId}
@@ -408,6 +455,16 @@ function MultipleChoiceOptions({
                                             <button type="submit">Import Image</button>
                                         </form>
                                     )}
+
+                                    {/* --- BUTTONS MOVED BEFORE INPUT (Previous change) --- */}
+                                        {question.correct === oIndex ? (
+                                            <button class="optionbuttonGroup setCorrect">SET</button>
+                                        ) : (
+                                            <button class="optionbuttonGroup" onClick={() => onSetCorrect(qIndex, oIndex)}>SET</button>
+                                        )}
+                                
+                                        <button class="optionbuttonGroup" style={{ backgroundColor: '#ca7b7cff' }}  onClick={() => onRemoveOption(qIndex, oIndex)}>X</button>
+                                        {/* --- END BUTTONS --- */}
                                 </li>
                             );
                         })}
@@ -420,10 +477,8 @@ function MultipleChoiceOptions({
                     onSubmit={(e) => handleAddOption(e, qIndex)} 
                     encType={isMultipleChoice ? "multipart/form-data" : "application/x-www-form-urlencoded"}
                 >
-                    <div>
-                        <button type="submit">SAVE</button>
-                        <input type="text" name="option_text" placeholder="Enter New Option Text Here" required />
-                    </div>
+                        {/* 1. REMOVED 'required' attribute to allow empty submission */}
+                        <input type="text" name="option_text" placeholder="Enter New Option Text Here" />
                     
                     {/* Option Image: Only for Multiple Choice (Normal file input for ADD) */}
                     {isMultipleChoice && (
@@ -431,6 +486,8 @@ function MultipleChoiceOptions({
                             <input type="file" name="option_image" id={`option_image_add_${qIndex}`} accept="image/*" />
                         </>
                     )}
+
+                    <button type="submit">ADD</button>
                 </form>
             </div>   
         </>
@@ -533,21 +590,20 @@ function ConnectingDotsOptions({ question, qIndex, onUpdateItemText, onUpdateCDO
                             return (
                                 // Main list item for the PAIR
                                 <li key={pair.a.id} className="pair" style={{ padding: '15px', marginBottom: '15px', borderRadius: '5px' }}>
-                                   
-                                    <div style={{textAlign: 'right' }}>
-                                        <button 
-                                            onClick={() => onRemoveOption(qIndex, removeIndex)} 
-                                            class="removePair"
-                                            style={{ backgroundColor: '#FF5255'}}
-                                        >
-                                            REMOVE
-                                        </button>
-                                    </div>
-
                                     {/* Container for the two columns */}
                                     <div style={{ display: 'grid', justifyContent: '', flexWrap: 'wrap', flexGrow: '1' }}>
                                         {renderOptionEditor(pair.a)}
                                         {renderOptionEditor(pair.b)}
+                                    </div>
+
+                                    <div style={{textAlign: 'right' }}>
+                                        <button 
+                                            onClick={() => onRemoveOption(qIndex, removeIndex)} 
+                                            class="removePair"
+                                            style={{ backgroundColor: '#CA7B7C'}}
+                                        >
+                                            X
+                                        </button>
                                     </div>
                                 </li>
                             );
@@ -557,17 +613,19 @@ function ConnectingDotsOptions({ question, qIndex, onUpdateItemText, onUpdateCDO
                 
                 {/* Add Pair Form with Images */}
                 <form class="addOptionConnectingDots" onSubmit={(e) => handleAddConnectingDotPair(e, qIndex)} encType="multipart/form-data">
-                    <button type="submit">Add Pair</button>
                     <div class="addQuestionPair">  
                         <div style={{ margin: '10px' }}>
-                            <input type="text" name="text1" placeholder="Item for first Column" required style={{ display: 'block'}}/>
+                            {/* 2. REMOVED 'required' attribute to allow empty submission */}
+                            <input type="text" name="text1" placeholder="Enter New Option Text for First Column" style={{ display: 'block'}}/>
                             <input type="file" name="file1" accept="image/*" />
                         </div>
                         <div style={{ margin: '10px' }}>
-                            <input type="text" name="text2" placeholder="Item for second Column" required style={{ display: 'block'}}/>
+                            {/* 3. REMOVED 'required' attribute to allow empty submission */}
+                            <input type="text" name="text2" placeholder="Enter New Option Text for Second Column" style={{ display: 'block'}}/>
                             <input type="file" name="file2" accept="image/*" />
                         </div>
                     </div> 
+                    <button type="submit">ADD</button>
                 </form>
             </div>
         </>
@@ -605,6 +663,13 @@ function QuestionEditor({
 
     return (
         <div className="question" style={{ border: '1px solid #ccc', padding: '15px', marginBottom: '20px' }}>
+
+            {/* 2. The Type Selector */}
+            <QuestionTypeSelector 
+                currentType={question.type} 
+                qIndex={qIndex} 
+                onTypeChange={onUpdateQuestionType} 
+            />
             
             {/* START: Grouping the Question Form and Remove Button with flex layout */}
             <div style={{ 
@@ -634,19 +699,12 @@ function QuestionEditor({
             </div>
             {/* END: Grouping the Question Form and Remove Button */}
 
-            {/* 2. Render the specific Options Editor based on type */}
+            {/* 3. Render the specific Options Editor based on type */}
             {question.type === 'multiple_choice' || question.type === 'fill_in_blanks' ? (
                 <MultipleChoiceOptions {...mcFitbProps} />
             ) : question.type === 'connecting_dots' ? (
                 <ConnectingDotsOptions {...cdProps} />
             ) : null}
-            
-            {/* 3. The Type Selector */}
-            <QuestionTypeSelector 
-                currentType={question.type} 
-                qIndex={qIndex} 
-                onTypeChange={onUpdateQuestionType} 
-            />
         </div>
     );
 }
@@ -672,6 +730,9 @@ function App() {
     
     // NEW STATE: For the custom notification modal
     const [notification, setNotification] = React.useState({ show: false, message: '', isLink: false });
+    
+    // NEW STATE: For the login required modal
+    const [showLoginModal, setShowLoginModal] = React.useState(false);
 
 
     // --- State & Draft Helpers ---
@@ -739,6 +800,11 @@ function App() {
             return { ...prevFormData, questions: newQuestions };
         });
     };
+    
+    // NEW HANDLER: For the modal's redirect button
+    const handleLoginRedirect = () => {
+        window.location.href = 'login.html'; 
+    };
 
     // --- Effects (Hooks) ---
     
@@ -749,50 +815,100 @@ function App() {
         }
     }, [formId]); 
     
-    /** Primary Effect for handling Supabase Authentication State changes (Login/Logout & Redirect). */
+    /** * Primary Effect for handling Supabase Authentication, Autosave, and Listeners.
+     * This effect must be re-run whenever a function it calls changes (e.g., handleSaveForm),
+     * so it uses a ref for the save function to stabilize it for the event listeners.
+     */
+    const saveFormRef = React.useRef(handleSaveForm);
+    React.useEffect(() => {
+        // Update the ref whenever handleSaveForm changes
+        saveFormRef.current = handleSaveForm;
+    }, [handleSaveForm]);
+
+
     React.useEffect(() => {
         
         // Function to check session, load data, or redirect to login
         const checkSessionAndRedirect = async () => {
+             // 1. Get current session
              const { data: { session } } = await supabase.auth.getSession();
-             setSession(session);
+             setSession(session); // Set session state based on initial check
              
              if (!session) {
-                 // No session found: Redirect to the dedicated login page
-                 window.location.href = 'login.html';
+                 // No session found: Set state to show the modal
+                 setLoading(false); // Stop loading UI
+                 setShowLoginModal(true); // Show the modal
              } else {
-                 // Session exists: Proceed to load data
+                 // Session exists: Proceed to clear loading
                  setLoading(false); 
              }
         };
 
-        // 1. Check session on mount (handles page reload)
+        // ----------------------------------------------------
+        // AUTOSAVE HANDLERS
+        // ----------------------------------------------------
+
+        // Handler for when the tab/window loses focus
+        const handleVisibilityChange = () => {
+            // Check if the document is now hidden (user switched tabs or minimized)
+            if (document.visibilityState === 'hidden') {
+                // Use the ref to call the latest version of handleSaveForm
+                saveFormRef.current(); 
+                console.log('Autosave triggered on tab switch/loss of focus.');
+            }
+        };
+
+        // Handler for when the user attempts to close the window or navigate away
+        const handleBeforeUnload = (event) => {
+            saveFormRef.current();
+            console.log('Autosave triggered on page close/reload.');
+        };
+
+        // ----------------------------------------------------
+        // 1. Initial Check & Session Subscription
+        // ----------------------------------------------------
         checkSessionAndRedirect();
 
-        // 2. Subscribe to Auth Changes (handles real-time events like manual logout)
         const { data: { subscription } = {} } = supabase.auth.onAuthStateChange(
             (event, session) => {
-                setSession(session);
+                // This listener ensures setSession is updated if the user logs in/out 
+                // in another tab, which is necessary to trigger form loading/clearing.
+                setSession(session); 
                 
                 if (!session) {
-                    // If session is removed (e.g., manual logout), redirect
-                    window.location.href = 'login.html'; 
+                    setShowLoginModal(true);
+                    setFormId(''); // Clear form context
+                    setFormData({}); // Clear form data
                 }
             }
         );
 
-        // Cleanup: Unsubscribe from the listener when component unmounts
-        // Handle case where subscription might be null or undefined
+        // ----------------------------------------------------
+        // 2. Add Event Listeners for Autosave
+        // ----------------------------------------------------
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        // ----------------------------------------------------
+        // 3. Cleanup Function
+        // ----------------------------------------------------
         return () => {
-             if (subscription && typeof subscription.unsubscribe === 'function') {
+            if (subscription && typeof subscription.unsubscribe === 'function') {
                 subscription.unsubscribe();
             }
+            // Remove listeners when the component unmounts
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, []); 
-    
-    /** Effect to load form data when formId changes (triggered by URL param or local state change). */
+    }, [handleSaveForm]); // handleSaveForm is a dependency to update the ref
+
+
+    /** Effect to load form data when formId changes (triggered by URL param or local state change). 
+     * CRITICAL FIX: Dependency is now 'session?.user?.id' to avoid reloading on tab focus/token refresh. 
+     */
     React.useEffect(() => {
-        if (formId && session) {
+        // Only proceed if a form is selected AND we have a valid session user ID
+        if (formId && session && session.user && session.user.id) {
 
             // Clear previous form data immediately for a clean slate
             // Check against module_id instead of id
@@ -806,7 +922,10 @@ function App() {
         } else if (!formId) {
             setFormData({});
         }
-    }, [formId, session]);
+    // CRITICAL CHANGE: Using session.user.id as a dependency. When the token refreshes, 
+    // the entire 'session' object reference changes, but 'session.user.id' does not. 
+    // This stops redundant fetching on tab focus.
+    }, [formId, session?.user?.id]);
 
 
     // --- Core Data Handlers ---
@@ -970,8 +1089,11 @@ function App() {
                         
                         localStorage.removeItem(`form_data_draft_${formId}`);
                         
-                        alert("Form saved successfully!")
-                        setSuccess('Form saved successfully to Database!');
+                        // Only show success message for manual saves, not for silent autosaves
+                        if (document.visibilityState === 'visible') {
+                            alert("Form saved successfully!")
+                            setSuccess('Form saved successfully to Database!');
+                        }
                         resolve(true); // Resolve the promise successfully
                         
                     } catch (err) {
@@ -1052,13 +1174,19 @@ function App() {
     const handleAddQuestion = async (e) => {
         e.preventDefault();
         const text = e.target.question_text.value.trim();
-        if (!text) return;
+        
+        // --- MODIFIED SECTION ---
+        // 1. Remove the check that returns early if the text is empty.
+        
+        // 2. Define default text if the input is empty
+        const questionText = text || 'New Question (Click to Edit)'; 
+        // --- END MODIFIED SECTION ---
 
         setFormDataAndDraft(prevFormData => ({
             ...prevFormData,
             questions: [...(prevFormData.questions || []), { 
                 id: crypto.randomUUID(), // Unique ID for keying/removal
-                text, 
+                text: questionText, // Use the new text variable
                 image: null, 
                 type: 'multiple_choice', // Default to multiple choice
                 options: [], 
@@ -1124,7 +1252,10 @@ function App() {
         e.preventDefault();
         const text = e.target.option_text.value.trim();
         const file = e.target.option_image.files[0];
-        if (!text) return;
+        // Note: The previous 'if (!text) return;' check was removed in the last update.
+
+        // Define default text if the input is empty
+        const optionText = text || 'New Option (Click to Edit)';
         
         let imagePath = null;
         if (file && session && formId) {
@@ -1135,7 +1266,8 @@ function App() {
             const newQuestions = [...(prevFormData.questions || [])];
             if (!newQuestions[qIndex]) return prevFormData;
 
-            newQuestions[qIndex].options = [...(newQuestions[qIndex].options || []), { id: crypto.randomUUID(), text, image: imagePath }];
+            // Use optionText instead of text
+            newQuestions[qIndex].options = [...(newQuestions[qIndex].options || []), { id: crypto.randomUUID(), text: optionText, image: imagePath }];
             return { ...prevFormData, questions: newQuestions };
         });
         e.target.reset();
@@ -1145,13 +1277,17 @@ function App() {
     const handleAddFillInTheBlankOption = (e, qIndex) => {
         e.preventDefault();
         const text = e.target.option_text.value.trim();
-        if (!text) return;
+        // Note: The previous 'if (!text) return;' check was removed in the last update.
+
+        // Define default text if the input is empty
+        const optionText = text || 'New Blank Answer (Click to Edit)';
 
         setFormDataAndDraft(prevFormData => {
             const newQuestions = [...(prevFormData.questions || [])];
             if (!newQuestions[qIndex]) return prevFormData;
             
-            newQuestions[qIndex].options = [...(newQuestions[qIndex].options || []), { id: crypto.randomUUID(), text: text }]; 
+            // Use optionText instead of text
+            newQuestions[qIndex].options = [...(newQuestions[qIndex].options || []), { id: crypto.randomUUID(), text: optionText }]; 
             if (newQuestions[qIndex].correct === undefined) newQuestions[qIndex].correct = -1;
             return { ...prevFormData, questions: newQuestions };
         });
@@ -1161,12 +1297,16 @@ function App() {
     /** Adds a new paired option for 'Connecting Dots', assigning unique IDs, and handling images. */
     const handleAddConnectingDotPair = async (e, qIndex) => {
         e.preventDefault();
-        const text1 = e.target.text1.value.trim();
-        const text2 = e.target.text2.value.trim();
+        const input1 = e.target.text1.value.trim();
+        const input2 = e.target.text2.value.trim();
         const file1 = e.target.file1.files[0];
         const file2 = e.target.file2.files[0];
 
-        if (!text1 || !text2) return;
+        // Note: The previous 'if (!text1 || !text2) return;' check was removed in the last update.
+        
+        // Define default texts
+        const text1 = input1 || 'Column A (Click to Edit)';
+        const text2 = input2 || 'Column B (Click to Edit)';
 
         // Upload images if present
         let imagePath1 = null;
@@ -1310,20 +1450,14 @@ function App() {
 
     const user = session ? session.user : null;
 
+    // RENDER LOGIN REQUIRED MODAL FIRST IF APPLICABLE
+    if (showLoginModal) {
+        return e(LoginRequiredModal, { onRedirect: handleLoginRedirect });
+    }
+
     if (loading) {
         // Show a simple loading state while session check/data load happens
         return <h1>Loading Application...</h1>;
-    }
-
-    // --- Authentication View (If not logged in) ---
-    if (!user) {
-        // This state should be momentary before the redirect in useEffect happens
-        return (
-            <div>
-                <h1>Supabase Form Builder</h1>
-                <p>Redirecting to <a href="login.html">Login</a>...</p>
-            </div>
-        );
     }
 
     // --- Main Application View (If logged in) ---
@@ -1347,107 +1481,111 @@ function App() {
                         type="text" 
                         name="form_title" 
                         placeholder="Enter New Module Name Here" 
-                        required 
                         // Controlled input ensures this box clears on form switch
                         value={newFormTitle} 
                         onChange={(e) => setNewFormTitle(e.target.value)}
                     />
-                    <button type="submit">CREATE MODULE</button>
+                    <button type="submit">CREATE NEW MODULE</button>
                 </form>
             </div>
 
            {/* Form Editor View (only visible when a form is selected) */}
             {formId && formData.module_id && (
-                <div id="formPage" key={formId}>                    
-                    {/* NEW DIV WRAPPING TITLE INPUT AND BUTTONS */}
-                    <div id="formEditingHeader">
-                        {/* Title Input */}
-                        <div id="columnSide">
-                            <input 
-                                key={formId}
-                                style={{ 
-                                    margin: '10px 0px', 
-                                }} 
-                                type="text" 
-                                name="form_title" 
-                                placeholder="Questionnaire Name Here" 
-                                defaultValue={formData.title} 
-                                required 
-                                onBlur={(e) => {
-                                    const newTitle = e.target.value.trim();
-                                    if (newTitle && newTitle !== formData.title) {
-                                        setFormDataAndDraft({ ...formData, title: newTitle });
-                                    }
-                                }}
-                            />
+                <div id="formPage" key={formId}>                
+                        {/* NEW DIV WRAPPING TITLE INPUT AND BUTTONS */}
+                        <div id="formEditingHeader">
+                            {/* Title Input */}
+                            <div id="columnSide">
+                                <div>
+                                    <input 
+                                        key={formId}
+                                        style={{ 
+                                            margin: '10px 0px 0px 0px', 
+                                            fontSize: 'x-large',
+                                        }} 
+                                        type="text" 
+                                        name="form_title" 
+                                        placeholder="Questionnaire Name Here" 
+                                        defaultValue={formData.title} 
+                                        required 
+                                        onBlur={(e) => {
+                                            const newTitle = e.target.value.trim();
+                                            if (newTitle && newTitle !== formData.title) {
+                                                setFormDataAndDraft({ ...formData, title: newTitle });
+                                            }
+                                        }}
+                                    />
 
-                            {/* --- NEW DESCRIPTION TEXTAREA --- */}
-                            <textarea 
-                                key={`desc-${formId}`} // Key for controlled reset on form switch
-                                name="form_description" 
-                                placeholder="Enter Your Optional Description of the Module Here" 
-                                rows="3"
-                                defaultValue={formData.description} 
-                                style={{ 
-                                    width: '100%', 
-                                    padding: '10px', 
-                                    margin: '10px 0', 
-                                    boxSizing: 'border-box',
-                                    border: '1px solid #ccc',
-                                    borderRadius: '4px'
-                                }} 
-                                onBlur={(e) => {
-                                    // Update description state on blur
-                                    const newDescription = e.target.value.trim();
-                                    // Only update state if the description has changed
-                                    if (newDescription !== formData.description) {
-                                        setFormDataAndDraft({ ...formData, description: newDescription });
-                                    }
-                                }}
-                            />
-                            {/* --- END NEW DESCRIPTION TEXTAREA --- */}
+                                    {/* Renamed button to Save Draft and added handlePublishModule */}
+                                    <button id="saveModule" onClick={handleSaveForm} className="save-button">SAVE MODULE</button>
+                                    <button id="publishModule" onClick={handleDeleteForm} className="delete-button">DELETE MODULE</button>
+                                    <button id="publishModule" onClick={handlePublishModule} className="publish-button">PUBLISH</button>
+                                </div>
+
+                                {/* --- NEW DESCRIPTION TEXTAREA --- */}
+                                <textarea 
+                                    key={`desc-${formId}`} // Key for controlled reset on form switch
+                                    name="form_description" 
+                                    placeholder="Enter Your Optional Description of the Module Here" 
+                                    rows="2"
+                                    defaultValue={formData.description} 
+                                    style={{ 
+                                        width: '100%', 
+                                        padding: '10px', 
+                                        margin: '5px 0', 
+                                        boxSizing: 'border-box',
+                                        border: '1px solid #ccc',
+                                        borderRadius: '4px',
+                                        resize: 'none',
+                                        outline: 'none',
+                                    }} 
+                                    onBlur={(e) => {
+                                        // Update description state on blur
+                                        const newDescription = e.target.value.trim();
+                                        // Only update state if the description has changed
+                                        if (newDescription !== formData.description) {
+                                            setFormDataAndDraft({ ...formData, description: newDescription });
+                                        }
+                                    }}
+                                />
+                                {/* --- END NEW DESCRIPTION TEXTAREA --- */}
+                            </div>
                         </div>
+                        {/* END NEW DIV */}
 
-                        <div>
-                            {/* Renamed button to Save Draft and added handlePublishModule */}
-                            <button id="saveModule" onClick={handleSaveForm} className="save-button">SAVE MODULE</button>
-                            <button id="deleteModule" onClick={handleDeleteForm} className="delete-button">DELETE MODULE</button>
-                            <button id="saveModule" onClick={handlePublishModule} className="publish-button">PUBLISH MODULE</button>
-                        </div>
-                    </div>
-                    {/* END NEW DIV */}
+                    <div id="formPageSub">     
 
-                    {/* --- Question/Option editing interface (USING NEW COMPONENT) --- */}
-                    {(formData.questions && formData.questions.length > 0) ? (
-                        formData.questions.map((question, qIndex) => (
-                            <QuestionEditor
-                                key={qIndex}
-                                question={question}
-                                qIndex={qIndex}
-                                // Pass all handlers required by the editor and its children
-                                onUpdateItemText={handleUpdateItemText}
-                                onUpdateQuestion={handleUpdateQuestion}
-                                onRemoveQuestion={handleRemoveQuestion}
-                                onUpdateQuestionType={handleUpdateQuestionType}
-                                onRemoveOption={handleRemoveOption}
-                                // MC/FITB Handlers
-                                handleAddMultipleChoiceOption={handleAddMultipleChoiceOption}
-                                handleAddFillInTheBlankOption={handleAddFillInTheBlankOption}
-                                handleUpdateOption={handleUpdateOption}
-                                handleSetCorrect={handleSetCorrect}
-                                // CD Handlers
-                                handleAddConnectingDotPair={handleAddConnectingDotPair}
-                                onUpdateCDOptionImage={handleUpdateCDOptionImage}
-                            />
-                        ))
-                    ) : (
-                        <p>No questions yet. Add one below.</p>
-                    )}
-
+                        {/* --- Question/Option editing interface (USING NEW COMPONENT) --- */}
+                        {(formData.questions && formData.questions.length > 0) ? (
+                            formData.questions.map((question, qIndex) => (
+                                <QuestionEditor
+                                    key={qIndex}
+                                    question={question}
+                                    qIndex={qIndex}
+                                    // Pass all handlers required by the editor and its children
+                                    onUpdateItemText={handleUpdateItemText}
+                                    onUpdateQuestion={handleUpdateQuestion}
+                                    onRemoveQuestion={handleRemoveQuestion}
+                                    onUpdateQuestionType={handleUpdateQuestionType}
+                                    onRemoveOption={handleRemoveOption}
+                                    // MC/FITB Handlers
+                                    handleAddMultipleChoiceOption={handleAddMultipleChoiceOption}
+                                    handleAddFillInTheBlankOption={handleAddFillInTheBlankOption}
+                                    handleUpdateOption={handleUpdateOption}
+                                    handleSetCorrect={handleSetCorrect}
+                                    // CD Handlers
+                                    handleAddConnectingDotPair={handleAddConnectingDotPair}
+                                    onUpdateCDOptionImage={handleUpdateCDOptionImage}
+                                />
+                            ))
+                        ) : (
+                            <p>No questions yet. Add one below.</p>
+                        )}
+                    </div>   
                     {/* --- Add New Question Input --- */}
                     <form onSubmit={handleAddQuestion}> 
-                        <input id="addQuestionInput" type="text" name="question_text" placeholder="Enter New Question Text Here" required />
-                        <button id="addQuestionButton" type="submit">Add Question</button>
+                        <input id="addQuestionInput" type="text" name="question_text" placeholder="Enter New Question Text Here (optional)" />
+                        <button id="addQuestionButton" type="submit">ADD NEW QUESTION</button>
                     </form>
                 </div>
             )}
@@ -1563,7 +1701,7 @@ function UserFormsList() {
 ReactDOM.render(<UserFormsList />, document.getElementById('forms-list-container'));
 
 
-const e = React.createElement;
+// const e = React.createElement; // Already defined globally/locally above
 
 // =================================================================
 // 9. THE MODULAR COMPONENT (Login/Logout Toggle)

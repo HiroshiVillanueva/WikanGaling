@@ -33,7 +33,7 @@
 
     padding: 2em;
 
-    overflow-x: visible;
+    /* overflow-x: visible; */
     /* overflow-y: scroll; */
 }
 
@@ -164,7 +164,7 @@ p {
 
 .auth-container {
     overflow-y: scroll;
-    overflow-x: visible;
+    /* overflow-x: visible; */
 
     flex-grow: 1;
 }

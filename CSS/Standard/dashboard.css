@@ -20,7 +20,7 @@
 }
 
 #content #list a {
-    padding: 1em;
+    padding: 0.5em 1em;
     font-family: 'Inknut Antiqua Regular';
     font-size: 2em;
     line-height: 1.5em;
@@ -44,6 +44,7 @@
 }
 
 #content #list ul li p {
+    font-size: larger;
     margin-right: 5em;
 }
 
@@ -54,7 +55,7 @@
     align-items: start;
 }
 
-#content #list ul li div button {
+.dashButtonsActual {
     padding: 1em 3em;
     margin: 0 0 16px 32px;
     background-color: white;
@@ -86,4 +87,34 @@ strong {
     position: relative;
     height: 50vh !important;
     overflow-y: scroll !important;
+}
+
+.dashboardButtons {
+    display: flex !important;
+    flex-direction: row !important;
+}
+
+.dashboardButtons button {
+    border: none;
+}
+
+.dashButtonsActualempty {
+    font-family: 'Franklin Gothic Regular' !important;
+    font-size: 1em !important;
+    line-height: 0 !important;
+    padding: 1em 3em !important;
+    background-color: rgb(255, 255, 255);
+    border-radius: 16px;
+    color: black;
+}
+.dashButtonsActualnone {
+    padding: 1em 0 !important;
+    border-radius: 16px;
+    margin: 0 0 16px 32px;
+    background-color: rgba(240, 248, 255, 0.002);
+}
+
+.dashButtonsActualempty:hover {
+    color: white;
+    background-color: black;
 }
