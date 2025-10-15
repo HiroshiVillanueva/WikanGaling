@@ -31,7 +31,11 @@ const extWidth = "15em";
 const rectWidthButton = "2.75em";
 const extWidthButton = "8.25em";
 
+// KEY for localStorage 
+const LOCK_STATE_KEY = "sidebarLocked"; 
+
 // STATE: Tracks if the sidebar is locked open by a button click (starts unlocked)
+// The actual state will be loaded in window.onload
 let isLocked = false; 
 
 // Timer setup for hover delay
@@ -105,6 +109,21 @@ function setExtendedState() {
     ig3.style.marginLeft = "15%";
 }
 
+/** * Sets the sidebar state based on the current 'isLocked' value. 
+ * This is used for initial load and after a lock toggle.
+ */
+function applyLockState(locked) {
+    if (locked) {
+        // --- LOCKING/LOADING LOCKED ---
+        arrow.src = "/Miscellanous/Images/playLock.png";
+        setExtendedState();
+    } else {
+        // --- UNLOCKING/LOADING UNLOCKED ---
+        arrow.src = "/Miscellanous/Images/play.png";
+        setRetractedState();
+    }
+}
+
 
 // =================================================================
 // 4. EVENT HANDLERS
@@ -119,6 +138,8 @@ const handleMouseOver = () => {
     // Only proceed if the sidebar is NOT locked
     if (!isLocked) {
         // Set the state change to happen after the delay
+        // NOTE: The original code executed setExtendedState immediately on mouseover. 
+        // I've kept it as-is for now, assuming the HOVER_DELAY_MS was placeholder or not fully implemented.
         setExtendedState();
     }
 };
@@ -136,24 +157,18 @@ const handleMouseOut = () => {
     }
 };
 
-/** Toggles the permanent lock state of the sidebar. */
+/** Toggles the permanent lock state of the sidebar and saves it to localStorage. */
 function toggleLock() {
     // 1. Invert the lock state
     isLocked = !isLocked; 
     console.log("Toggle Lock Fired. New Locked State:", isLocked);
 
-    if (isLocked) {
-        // --- LOCKING ---
-        // Immediately extend the sidebar permanently
-        arrow.src = "/Miscellanous/Images/playLock.png";
-        setExtendedState();
-    } else {
-        // --- UNLOCKING ---
-        // Immediately retract the sidebar to the default state
-        arrow.src = "/Miscellanous/Images/play.png";
-        setRetractedState();
-        // Hover listeners are already attached and will now respond since isLocked is false.
-    }
+    // 2. Save the new state to localStorage
+    // localStorage only stores strings, so we convert the boolean
+    localStorage.setItem(LOCK_STATE_KEY, isLocked.toString());
+
+    // 3. Apply the state (handles style changes)
+    applyLockState(isLocked);
 }
 
 
@@ -161,14 +176,35 @@ function toggleLock() {
 // 5. INITIALIZATION
 // =================================================================
 
+function loadLockState() {
+    // 1. Check localStorage for the saved state
+    const savedState = localStorage.getItem(LOCK_STATE_KEY);
+    
+    // 2. If a state is found, set isLocked based on it
+    // 'true' string from localStorage -> true boolean
+    // null or other string -> false boolean (default unlocked)
+    if (savedState !== null) {
+        isLocked = (savedState === 'true');
+    } else {
+        // If no saved state, default to unlocked
+        isLocked = false;
+    }
+    
+    // 3. Apply the initial state (either loaded or default)
+    applyLockState(isLocked);
+    console.log("Initial State Loaded. isLocked:", isLocked);
+}
+
+
 window.onload = function() {
-    // 1. Set the initial state (retracted, hover-enabled)
-    setRetractedState();
+    // 1. Load and apply the stored lock state from previous session
+    loadLockState();
     
     // 2. Set the one-off style
     sb_save_Menu.style.width = '190px'; 
     
     // 3. Attach hover listeners ONCE to the main sidebar element
+    // The handlers themselves check the current 'isLocked' state
     sidebar.addEventListener('mouseover', handleMouseOver);
     sidebar.addEventListener('mouseout', handleMouseOut);
     
