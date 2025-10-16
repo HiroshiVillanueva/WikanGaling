@@ -19,11 +19,11 @@ function ConfirmationModal({ onClose }) {
         <div className="modal-overlay">
             {/* The modal content box */}
             <div className="modal-content">
-                <h2>Confirmation Required</h2>
+                <h2>CONFIRMATION REQUIRED</h2>
                 <p>
                     Thank you for signing up!
                     <br/><br/>
-                    Please check your email to **confirm your account** before attempting to log in.
+                    PLEASE CHECK YOUR EMAIL AND CONFIRM YOUR ACCOUNT BEFORE LOGGING IN.
                 </p>
                 <button onClick={onClose}>Understood</button>
             </div>
