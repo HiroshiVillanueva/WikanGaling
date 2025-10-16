@@ -214,6 +214,70 @@ function SavingModal() {
     );
 }
 
+// =================================================================
+// NEW: CONFIRM DELETE MODAL COMPONENT (Replaces window.confirm)
+// =================================================================
+
+/**
+ * A simple non-blocking modal component to confirm module deletion.
+ * @param {function} onConfirm - Function to call when the user confirms the deletion.
+ * @param {function} onCancel - Function to call when the user cancels the deletion.
+ */
+function ConfirmDeleteModal({ onConfirm, onCancel }) {
+    const modalStyle = {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(72, 76, 81, 0.7)', // Slightly darker for critical action
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10002, // Ensure it's above other modals
+        color: 'black',
+    };
+
+    const contentStyle = {
+        backgroundColor: 'white',
+        padding: '30px',
+        borderRadius: '8px',
+        width: '400px',
+        textAlign: 'center',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+    };
+    
+    const baseButtonStyle = {
+        fontFamily: 'Inknut Antiqua SemiBold',
+        color: 'white',
+        cursor: 'pointer',
+        border: 'none',
+        borderRadius: '5px',
+        padding: '10px 20px',
+        marginTop: '20px',
+        fontSize: '16px',
+        margin: '0 10px',
+    };
+    
+    const confirmButtonStyle = {
+        ...baseButtonStyle,
+        backgroundColor: '#FF5255', // Red for danger
+    };
+    
+    const cancelButtonStyle = {
+        ...baseButtonStyle,
+        backgroundColor: '#484c51', // Darker gray for cancel
+    };
+
+    return e('div', { style: modalStyle },
+        e('div', { style: contentStyle },
+            e('h2', { style: { color: '#FF5255' } }, 'Confirm Deletion'),
+            e('p', { style: {color: 'black', marginBottom: '20px'} }, 'Are you sure you want to delete this module and ALL associated images? This action cannot be undone.'),
+            e('button', { style: confirmButtonStyle, onClick: onConfirm }, 'DELETE MODULE'),
+            e('button', { style: cancelButtonStyle, onClick: onCancel }, 'Cancel')
+        )
+    );
+}
 
 
 // =================================================================
@@ -738,6 +802,8 @@ function App() {
 
     // ADD THIS NEW STATE
     const [showSavingModal, setShowSavingModal] = React.useState(false); 
+    // NEW STATE: For the delete confirmation modal (Requested change)
+    const [showDeleteModal, setShowDeleteModal] = React.useState(false); // <--- ADDED
     
     // >>> START OF CHANGES FOR WARNING ALERT <<<
     const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false); // <-- 1. NEW STATE: The boolean flag
@@ -1168,50 +1234,54 @@ function App() {
         }
     };
 
-    /** Deletes the form entry, including all associated files in storage. */
+    /** NEW HANDLER: Opens the delete confirmation modal. */
     const handleDeleteForm = async () => {
-        // Using custom modal instead of window.confirm for consistency, but reusing the window.confirm 
-        // prompt since we cannot generate a new component for a simple delete confirmation.
-        if (window.confirm('Are you sure you want to delete this form and all images?')) { 
-            if (formId && session) {
-                try {
-                    // 1. Delete all associated images from Storage
-                    // Note: Supabase Storage paths are typically bucket/folder/file. Here, the 'folder' is constructed as [user_id]/[formId].
-                    const { data: listData } = await supabase.storage
-                        .from(FORMS_BUCKET)
-                        // List files under the teacher's ID directory (was user_id)
-                        .list(`${session.user.id}/${formId}`, { limit: 100 }); 
+        // NEW LOGIC: Just show the confirmation modal
+        setShowDeleteModal(true); 
+    };
+    
+    /** NEW HANDLER: Performs the actual deletion after user confirmation. (Moved logic from original handleDeleteForm) */
+    const confirmDeleteForm = async () => {
+        setShowDeleteModal(false); // Close the modal first
+        
+        if (formId && session) {
+            try {
+                // 1. Delete all associated images from Storage
+                // Note: Supabase Storage paths are typically bucket/folder/file. Here, the 'folder' is constructed as [user_id]/[formId].
+                const { data: listData } = await supabase.storage
+                    .from(FORMS_BUCKET)
+                    // List files under the teacher's ID directory (was user_id)
+                    .list(`${session.user.id}/${formId}`, { limit: 100 }); 
 
-                    if (listData && listData.length > 0) {
-                        // Files are listed with their name relative to the path, so we rebuild the full path
-                        const filesToDelete = listData.map(file => `${session.user.id}/${formId}/${file.name}`);
-                        if (filesToDelete.length > 0) {
-                            // The .remove method expects full paths from the bucket root
-                            await supabase.storage.from(FORMS_BUCKET).remove(filesToDelete);
-                        }
+                if (listData && listData.length > 0) {
+                    // Files are listed with their name relative to the path, so we rebuild the full path
+                    const filesToDelete = listData.map(file => `${session.user.id}/${formId}/${file.name}`);
+                    if (filesToDelete.length > 0) {
+                        // The .remove method expects full paths from the bucket root
+                        await supabase.storage.from(FORMS_BUCKET).remove(filesToDelete);
                     }
-
-                    // 2. Delete JSON entry from Database
-                    const { error: dbError } = await supabase
-                        .from(FORMS_TABLE)
-                        .delete()
-                        // Filter by module_id and teacher_id
-                        .eq('module_id', formId)
-                        .eq('teacher_id', session.user.id); // Ensure user owns the form (was user_id)
-                    
-                    if (dbError) throw dbError;
-
-                    // 3. Clean up local state
-                    localStorage.removeItem(`form_data_draft_${formId}`);
-                    setFormId('');
-                    setFormData({});
-                    // CRITICAL CHANGE: Reset the flag after deletion
-                    setHasUnsavedChanges(false);
-                    setSuccess('Form and all associated files deleted successfully!');
-                    window.history.pushState({}, '', '?'); // Clear form_id from URL
-                } catch (err) {
-                    setError('Error deleting form: ' + err.message);
                 }
+
+                // 2. Delete JSON entry from Database
+                const { error: dbError } = await supabase
+                    .from(FORMS_TABLE)
+                    .delete()
+                    // Filter by module_id and teacher_id
+                    .eq('module_id', formId)
+                    .eq('teacher_id', session.user.id); // Ensure user owns the form (was user_id)
+                
+                if (dbError) throw dbError;
+
+                // 3. Clean up local state
+                localStorage.removeItem(`form_data_draft_${formId}`);
+                setFormId('');
+                setFormData({});
+                // CRITICAL CHANGE: Reset the flag after deletion
+                setHasUnsavedChanges(false);
+                setSuccess('Form and all associated files deleted successfully!');
+                window.history.pushState({}, '', '?'); // Clear form_id from URL
+            } catch (err) {
+                setError('Error deleting form: ' + err.message);
             }
         }
     };
@@ -1513,6 +1583,12 @@ function App() {
         <div>
             {/* RENDER THE SAVING MODAL HERE */}
             {showSavingModal && e(SavingModal)} 
+            
+            {/* RENDER THE NEW DELETE CONFIRMATION MODAL HERE */}
+            {showDeleteModal && e(ConfirmDeleteModal, { 
+                onConfirm: confirmDeleteForm, // Use the new handler for confirmation
+                onCancel: () => setShowDeleteModal(false) // Simple handler to close the modal
+            })}
 
             <div>
                 {/* Custom Notification Modal Render */}
