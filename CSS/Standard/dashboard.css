@@ -36,7 +36,7 @@
     margin: 1em;
 
     border-radius: 8px;
-    background-color: rgba(37, 56, 56, 0.194);
+    background-color: rgba(28, 44, 44, 0.347);
     backdrop-filter: blur(67px);
     box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.224), inset 0 1px 3px 1px rgba(255, 255, 255, 0.336);
     display: flex;
