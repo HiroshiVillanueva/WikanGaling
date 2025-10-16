@@ -159,6 +159,7 @@ function LoginForm() {
     };
     
     const handleToggleRegistering = () => {
+        change();
         setIsRegistering(!isRegistering);
         setEmail('');
         setPassword('');

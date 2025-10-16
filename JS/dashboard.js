@@ -475,7 +475,7 @@ function UserFormsList() {
         <ul style={{ margin: '0 0 1em 0', padding: 0}}>
             {formsList.map(form => (
                 <li key={form.module_id}>
-                    <a style={{ color: '#000' }} href={`module.html?form_id=${form.module_id}`}>
+                    <a style={{ color: '#000', fontSize: 'larger' }} href={`module.html?form_id=${form.module_id}`}>
                         {form.title}
                     </a>
                 </li>

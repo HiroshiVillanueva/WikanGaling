@@ -129,7 +129,7 @@
 
 
 .question {
-    background-color: #E5F5FF;
+    background-color: #e2e9eb;
     margin: 0em 2.5em 1em 2.5em;
 
     border: none !important;
@@ -150,7 +150,7 @@
 .questionHeader textarea {
     font-family: 'Inknut Antiqua Light';
     line-height: 1em;
-    background-color: #C1DAEA;
+    background-color: #d0d6da;
     outline: 0;
     border-radius: 8px;
     border: none;
@@ -191,7 +191,7 @@ input[type="file"]::file-selector-button {
 }
 
 .optionBackground {
-    background-color: #C1DAEA;
+    background-color: #bcc8d1;
     border-radius: 4px;
 }
 
@@ -367,7 +367,7 @@ input[type="file"]::file-selector-button {
 }
 
 .connectingPairOptionBackground {
-    background-color: #C1DAEA;
+    background-color: #bcc8d1;
     border-radius: 4px;
 }
 

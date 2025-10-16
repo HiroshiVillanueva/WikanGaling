@@ -32,6 +32,7 @@
     border: solid 2px black;
     border-radius: 8px;
     color: white;
+    margin: 1em 0 1em calc(50% - 300px);
 }
 #aboutUsSection a:hover {
     background-color: white;

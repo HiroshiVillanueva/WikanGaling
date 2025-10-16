@@ -32,8 +32,11 @@
 
         <div id="loginCard">
             <div id="loginHeader">
-                <h1>LOG INTO WIKANGALING</h1>
-                <a href="index.html"><img src="Miscellanous/Images/CloseW.png" alt=""></a>
+                <div id="titleContainer">
+                    <img id="loginLogo" src="Miscellanous/Images/Logo.svg" alt="">
+                    <h1 id="logger">LOG INTO WIKANGALING</h1>
+                </div>
+                <a href="index.html"><img id="Close" src="Miscellanous/Images/CloseW.png" alt=""></a>
             </div>
             <div id="loginForm"></div>
         </div>
@@ -48,5 +51,27 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script> 
 
     <script type="text/babel" src="JS/login.js"></script>
+        
+    <script>
+        area = document.getElementById('loginCard');
+        title = document.getElementById('logger');
+        button = document.getElementById('registering');
+
+        function change() {
+            if(title.innerHTML == "SIGN UP FOR WIKANGALING") {
+                console.log("Jo");
+                title.innerHTML = "LOG INTO WIKANGALING";
+                area.style.width = "39%";
+                return;
+            }
+
+            if(title.innerHTML == "LOG INTO WIKANGALING") {
+                console.log("please");
+                title.innerHTML = "SIGN UP FOR WIKANGALING";
+                area.style.width = "44%";
+                return;
+            }
+        }
+    </script>
 </body>
 </html>
