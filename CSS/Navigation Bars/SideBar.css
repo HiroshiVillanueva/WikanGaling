@@ -29,7 +29,7 @@
 
 /* CSS for the protruding button */
 #WidthChanger {
-    transition: all ease-out 0.09s !important;
+    transition: all ease-out 0.1s !important;
 
     display: flex;
     position: absolute;
