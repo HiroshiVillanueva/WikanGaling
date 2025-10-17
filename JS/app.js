@@ -469,7 +469,7 @@ function MultipleChoiceOptions({
     return (
         <>  <div class="optionBackground">       
                 {question.options.length === 0 ? (
-                    <p style={{marginLeft: '8px'}}>No options yet. Add one below.</p>
+                    <p style={{marginLeft: '8px', color: 'black'}}>No options yet. Add one below.</p>
                 ) : (
                     <ul>
                         {question.options.map((option, oIndex) => {
@@ -1810,8 +1810,8 @@ function UserFormsList() {
         <ul style={{ margin: '0 0 1em 0', padding: 0}}>
             {formsList.map(form => (
                 // Use module_id for key and link
-                <li key={form.module_id}> 
-                    <a style={{ color: '#000', fontSize: 'larger' }} href={`module.html?form_id=${form.module_id}`}>
+                <li style={{ margin: '1em 0' }}  key={form.module_id}> 
+                    <a style={{ color: '#000', fontSize: 'larger', margin: '1em 0' }} href={`module.html?form_id=${form.module_id}`}>
                         {form.title}
                     </a>
                 </li>
