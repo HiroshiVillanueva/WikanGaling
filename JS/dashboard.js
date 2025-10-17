@@ -20,8 +20,11 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
  * A simple, unstyled modal component to display the list of attempts.
  */
 function AttemptsModal({ moduleTitle, attempts, onClose }) {
+    // NEW STATE: To store the search input value
+    const [searchTerm, setSearchTerm] = React.useState('');
+
     if (!attempts && moduleTitle) {
-        // Simple loading state if title is available but data is null (fetching)
+        // Simple loading state
         return (
              <div style={{
                 position: 'fixed', top: 0, left: 0, width: '50vw', height: '100%',
@@ -34,17 +37,41 @@ function AttemptsModal({ moduleTitle, attempts, onClose }) {
             </div>
         );
     }
-    
+
     if (!attempts) return null; // Don't render if no data is passed (closed or initial state)
 
-    // A basic, unstyled modal overlay and content structure
+    // Helper function to format the timestamp (kept from original)
+    const formatTimestamp = (timestamp) => {
+        if (!timestamp) return 'N/A';
+        const options = {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        };
+        return new Date(timestamp).toLocaleDateString(undefined, options);
+    };
+    
+    // NEW LOGIC: Filter the attempts based on the search term
+    const filteredAttempts = attempts.filter(attempt => {
+        const lowerCaseSearch = searchTerm.toLowerCase();
+        // Check if the student name contains the search term
+        const nameMatches = attempt.studentName.toLowerCase().includes(lowerCaseSearch);
+        // Check if the score (converted to string) contains the search term
+        const scoreMatches = String(attempt.score).includes(lowerCaseSearch); 
+        
+        return nameMatches || scoreMatches;
+    });
+
+    // --- Styling (kept from original for context) ---
     const modalStyle = {
         position: 'fixed',
         top: 0,
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: 'rgba(72, 76, 81, 0.5)', // Dark overlay
+        backgroundColor: 'rgba(72, 76, 81, 0.5)', 
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -57,19 +84,28 @@ function AttemptsModal({ moduleTitle, attempts, onClose }) {
         padding: '20px',
         borderRadius: '5px',
         width: '50vw',
-        maxHeight: '80%',
+        minHeight: '85%',
+        maxHeight: '85%',
         position: 'relative',
         color: 'black',
+        display: 'flex',
+        flexDirection: 'column',
     };
 
     const headerStyle = {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        display: 'grid', 
+        width: '100%',
         borderBottom: '1px solid #ccc',
         paddingBottom: '5px',
         color: 'black',
     };
+
+    const headerButtonStyle = {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+    }
 
     const closeButtonStyle = {
         fontFamily: 'Inknut Antiqua Light',
@@ -92,46 +128,53 @@ function AttemptsModal({ moduleTitle, attempts, onClose }) {
         border: 'solid 1px black',
     };
 
-    // Helper function to format the timestamp
-    const formatTimestamp = (timestamp) => {
-        if (!timestamp) return 'N/A';
-        // Options for a readable date/time format
-        const options = { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric', 
-            hour: '2-digit', 
-            minute: '2-digit' 
-        };
-        // Use the built-in Date object to parse and format the ISO string
-        return new Date(timestamp).toLocaleDateString(undefined, options);
+    const searchInputStyle = {
+        color: 'black',
+        width: '100%',
+        padding: '10px',
+        margin: '10px 0',
+        borderRadius: '5px',
+        border: '1px solid #ccc',
+        boxSizing: 'border-box', // Ensure padding is included in the width
     };
 
     return (
         <div style={modalStyle}>
             <div style={contentStyle}>
                 <div style={headerStyle}>
-                    <h2>Attempts for "{moduleTitle}"</h2>
-                    <button style={closeButtonStyle} onClick={onClose}>X</button>
+                    <div style={headerButtonStyle}>
+                        <h2>Attempts for "{moduleTitle}"</h2>
+                        <button style={closeButtonStyle} onClick={onClose}>X</button>
+                    </div>
+                    <input 
+                        type="text"
+                        placeholder="Search by student name or score..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)} // Update search state on input change
+                        style={searchInputStyle}
+                    />
                 </div>
-                <div class="modalAttempts">
+                
+                <div class = "modalAttempts">
                     {attempts.length === 0 ? (
                         <p style={{color: 'black'}}>No attempts found for this module.</p>
                     ) : (
                         <>
-                            <p>Total Attempts: {attempts.length}</p>
-                            {attempts.map((attempt, index) => (
-                                <div key={index} style={attemptItemStyle}>
-                                    <strong style={{color: 'black'}}>Attempt {index + 1}</strong>
-                                    <ul>
-                                        <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Student: {attempt.studentName}</li>
-                                        <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Score: {attempt.score}%</li>
-                                        <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Correct: {attempt.totalCorrect} / {attempt.totalQuestions}</li>
-                                        {/* Display the formatted timestamp */}
-                                        <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Time: {formatTimestamp(attempt.createdAt)}</li> 
-                                    </ul>
-                                </div>
-                            ))}
+                            {filteredAttempts.length === 0 && searchTerm !== '' ? (
+                                <p style={{color: 'black'}}>No results found for "{searchTerm}".</p>
+                            ) : (
+                                filteredAttempts.map((attempt, index) => (
+                                    <div key={index} style={attemptItemStyle}>
+                                        <strong style={{color: 'black'}}>Attempt {attempts.indexOf(attempt) + 1}</strong>
+                                        <ul>
+                                            <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Student: {attempt.studentName}</li>
+                                            <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Score: {attempt.score}%</li>
+                                            <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Correct: {attempt.totalCorrect} / {attempt.totalQuestions}</li>
+                                            <li style={{color: 'black', backgroundColor: '#ffffffff', margin: '0.5em',}}>Time: {formatTimestamp(attempt.createdAt)}</li>
+                                        </ul>
+                                    </div>
+                                ))
+                            )}
                         </>
                     )}
                 </div>

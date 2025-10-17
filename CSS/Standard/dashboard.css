@@ -84,10 +84,11 @@ strong {
 
 
 .modalAttempts {
-    padding: 0 1em;
+    padding: 1em 1em 0 1em;
     position: relative;
     height: 50vh !important;
     overflow-y: scroll !important;
+    flex-grow: 1;
 }
 
 .dashboardButtons {
