@@ -48,7 +48,13 @@
     font-size: small;
     font-family: 'Inknut Antiqua Light';
     line-height: 1em;
-    margin: 0 1em;
+    padding: 0.5em 2.5em;
+    margin: 0.3em 1em;
+    width: fit-content;
+    border: dashed 2px white;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.326);
+    box-shadow: 0 2px 6px 1px rgba(0, 0, 0, 0.429);
 }
 
 

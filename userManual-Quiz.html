@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WikanGaling</title>
+
+    <link rel="shortcut icon" href="Miscellanous/Images/Logo.svg" type="image/x-icon">
+    <link rel="stylesheet" href="CSS/Standard/ScrollBar.css">
+    <link rel="stylesheet" href="CSS/Standard/body.css">
+    <link rel="stylesheet" href="CSS/Navigation Bars/NavigationBar.css">
+    <link rel="stylesheet" href="CSS/Navigation Bars/SideBar.css">
+    <link rel="stylesheet" href="Miscellanous/Assests/Fonts.css">
+    <link rel="stylesheet" href="CSS/Standard/aboutUs.css">
+
+    <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.22.5/babel.min.js"></script> 
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script> 
+    <script type="text/babel" src="JS/forms_list_component.js"></script>
+</head>
+<body style="background-image: url(Miscellanous/Images/background.jpg);">
+    <main style="z-index: 2;">
+
+        <!-- NAVIGATION BARS -->
+        <div id="Bars">
+            <aside id="SideBarMenu">
+                <img id="imgLogo" src="Miscellanous/Images/Logo.svg" alt="LOGO">
+                <div id="pageMenu">
+                    <div class="PageButtons" id="page_1">
+                        <a id="link_1" href="index.html"><img id="img1" src="Miscellanous/Images/home.png" alt="*"><h2 id="pageButtonTitle1">HOME</h2></a>
+                    </div>
+
+                    <div class="PageButtons" id="page_2">
+                        <a id="link_2" href="module.html"><img id="img2" src="Miscellanous/Images/writing.png" alt="*"><h2 id="pageButtonTitle2">EDITOR</h2></a>
+                    </div>
+
+                    <div class="PageButtons" id="page_3">
+                        <a id="link_3" href="dashboard.html"><img id="img3" src="Miscellanous/Images/server.png" alt="*"><h2 id="pageButtonTitle3">DASHBOARD</h2></a>
+                    </div>
+                </div>
+
+                <hr id="sideBarHR">
+
+
+                <div id="SavesMenu">
+                    <h3>SAVED MODULES: </h3>
+                    <div id="SavesPage">
+
+                        <div id="forms-list-container"></div>
+
+                    </div>
+                </div>
+
+
+                <div id="SidebarContext">
+                    <a href="userManual.html"><i>User Manual</i></a>
+                    <a><i>Rights Reserved</i></a>
+                </div>
+
+                <div id="WidthChanger"><img id="ArrowBtn" src="Miscellanous/Images/play.png" alt="Click" onclick="Ext_Rec()"></div>
+            </aside>
+            <nav>
+                <h1>WIKANGALING</h1>
+                <div id="navOptionSection">
+                    <a href="about us.html">ABOUT US</a>
+                    <div id="auth-toggle-container"></div>
+                </div>
+            </nav>
+        </div>
+        <!-- NAVIGATION BARS -->
+
+        <div id="content"> 
+            <h2 id="title">USER-MANUAL</h2>
+            <div id="aboutUsSection" style="overflow-y: scroll;">
+
+                <section id="intro" style="color: black;">
+                    <section style="margin-bottom: 4em;" id="features">
+                        <h3>Core Features</h3>
+
+                        <div class="feature">
+                            <h3>1. Student Landing Page </h3>
+                            <img class="screenshots" src="Miscellanous/Images/quiz/pic 1.jpg" alt="">
+                            <p>
+                                welcomes new users and requires a quick sign-in. Students should type their full names into the input field and then select the 'Ipagpatuloy' button to continue.
+                            </p> 
+
+                            <h3>2. Module Landing Page </h3>
+                            <img class="screenshots" src="Miscellanous/Images/quiz/pic 2.jpg" alt="">
+                            <p>
+                                clearly displays the module title and a brief description. Students can begin the module by clicking the 'SIMULAN' button.
+                           </p> 
+
+                            <h3>3. Student Landing Page </h3>
+                            <img class="screenshots" src="Miscellanous/Images/quiz/pic 3.jpg" alt="">
+                            <p>
+                                The module title is always displayed at the top for context, and students can track their progress using a visual progress bar and an accompanying label (e.g Tanong 1 ng 6) located nearby. 
+                            </p> 
+
+                            <h3>4. Student Landing Page </h3>
+                            <p>
+                                The main content area displays the question itself, followed by a set of options from which the student must select their answer.
+                            </p> 
+
+                            <img class="screenshots" src="Miscellanous/Images/quiz/pic 4.1.jpg" alt="">
+                            <img class="screenshots" src="Miscellanous/Images/quiz/pic 4.2.jpg.jpg" alt="">
+                            <p>
+                                The system provides immediate feedback upon answer selection. As soon as the student chooses an option, the selected option itself is highlighted in green if it is correct, or highlighted in red if it is incorrect. A corresponding message appears confirming the correct or incorrect status of the selected answer.
+                            </p> 
+
+                            <h3>5. Matching Type Interface: </h3>
+                            <img class="screenshots" src="Miscellanous/Images/quiz/pic 5.jpg" alt="">
+                            <p>
+                                The main content area is set up with two distinct columns. These columns contain the items that need to be paired, which may consist of text, images, or a combination of both. 
+                            </p> 
+                            <br>
+                            <p>
+                                To answer the question, the student simply clicks on an item in the first column and then clicks on its corresponding match in the second column to establish the connection.
+                            </p>
+                            <br> 
+                            <p>
+                                The system provides immediate visual feedback: correct pairings are instantly connected by a solid green line, while incorrect pairings show a broken red line, and a matching message appears immediately to confirm the outcome. Once all items are matched, the student selects the 'SUSUNOD' (Next) button to move on to the next question.
+                            </p> 
+
+                            <h3>6. Fill-in-the-Blanks Interface:</h3>
+                            <img class="screenshots" src="Miscellanous/Images/quiz/pic 6.jpg" alt="">
+                            <p>
+                                The main area presents a partially completed sentence or statement that requires an answer. 
+                            </p> 
+                            <br>
+                            <p>
+                                Students must use the drag-and-drop method to answer: they drag an option from the list of available choices and drop it into the target box labeled 'Ihulog Dito'. Once the blank is filled, the student selects the 'SUSUNOD' (Next) button to move on to the next question.
+                            </p> 
+
+
+                            <img class="screenshots" src="Miscellanous/Images/quiz/pic 7.1.jpg.jpg" alt="">
+                            <img class="screenshots" src="Miscellanous/Images/quiz/pic 7.2.jpg.jpg" alt="">
+                            <p>
+                                The system provides immediate feedback upon the successful action: the selected option is highlighted in green if correct, or highlighted in red if incorrect. If the answer is wrong, the correct answer is immediately displayed at the side for reference.
+                            </p> 
+
+                            <h3>7. Quiz Results Screen:</h3>
+                            <img class="screenshots" src="Miscellanous/Images/quiz/pic 8.1.jpg.jpg" alt="">
+                            <img class="screenshots" src="Miscellanous/Images/quiz/pic 8.2.jpg.jpg" alt="">
+                            <p>
+                                Upon completing the module, the student is taken to the Quiz Results Screen. 
+                                This page features a festive celebratory message and a congratulatory note. The student's final performance is highlighted by their score, which is clearly displayed as a fraction, such as 3 / 6. 
+                            </p> 
+                            <br>
+                            <p>
+                                At the bottom, students are presented with three action buttons: 'ULITIN' to retake the module which would redirect to the Module Landing Page, 'KABUUAN' to view a detailed breakdown summary of the students answers for each question, and 'TAPUSIN' to exit the activity and redirect to the Student Landing Page. 
+                            </p>
+
+                        </div>
+                    </section>
+
+                    <a href="userManual.html">GO BACK</a>
+
+                    <section style="margin-top: 2em;" id="features"></section>
+
+                </section>
+
+            </div>
+        </div>
+    </main>
+    <script src="JS/Navigation JS/SideBar Retraction.js"></script>
+    <script src="JS/Misc JS/Main.js"></script>
+</body>
+</html>

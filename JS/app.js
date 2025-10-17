@@ -391,7 +391,7 @@ function QuestionTypeSelector({ currentType, qIndex, onTypeChange }) {
     const types = [
         { key: 'multiple_choice', label: 'Multiple Choice' },
         { key: 'connecting_dots', label: 'Matching Types' },
-        { key: 'fill_in_blanks', label: 'Fill in the Blanks' },
+        { key: 'fill_in_blanks', label: 'Sentence Builder' },
     ];
 
     return (
@@ -646,7 +646,7 @@ function ConnectingDotsOptions({ question, qIndex, onUpdateItemText, onUpdateCDO
         <>
             <div class="connectingPairOptionBackground">
                 {pairs.length === 0 ? (
-                    <p style={{marginLeft: '8px'}}>No pairs yet. Add a new pair below.</p>
+                    <p style={{marginLeft: '8px', color: 'black'}}>No pairs yet. Add a new pair below.</p>
                 ) : (
                     <ul>
                         {pairs.map((pair) => {
@@ -1054,7 +1054,7 @@ function App() {
                     
                     // Ensure the primary key in state is 'module_id'
                     setFormDataAndDraft({ ...parsedDraft, module_id: id, questions: questionsWithTypes });
-                    setSuccess('Loaded local draft.');
+                    setSuccess('LOADED LOCAL DRAFT');
                     return;
 
                 } catch (e) {
@@ -1105,7 +1105,7 @@ function App() {
                 };
                 
                 setFormDataAndDraft(loadedFormData);
-                setSuccess('Form loaded from Database!');
+                setSuccess('MODULE LOADED SUCCESSFULLY');
                 // Remove draft now that database version is loaded
                 localStorage.removeItem(`form_data_draft_${id}`); 
             } else {
@@ -1152,7 +1152,7 @@ function App() {
             setFormData(newForm);
             setFormId(newFormId);
             setError('');
-            setSuccess('Form created and saved to Database!');
+            setSuccess('MODULE CREATED SUCCESSFULLY!');
             window.history.pushState({}, '', `?form_id=${newFormId}`); 
         } catch (err) {
             setError('Error creating form: ' + err.message);
@@ -1200,7 +1200,7 @@ function App() {
                         // Only show success message for manual saves, not for silent autosaves
                         if (document.visibilityState === 'visible') {
                             // alert("Form saved successfully!") // <--- REMOVED
-                            setSuccess('Form saved successfully to Database!');
+                            setSuccess('MODULE SAVED SUCCESSFULLY');
                         }
                         resolve(true); // Resolve the promise successfully
                         
@@ -1278,7 +1278,7 @@ function App() {
                 setFormData({});
                 // CRITICAL CHANGE: Reset the flag after deletion
                 setHasUnsavedChanges(false);
-                setSuccess('Form and all associated files deleted successfully!');
+                setSuccess('MODULE DELETED SUCCESSFULLY!');
                 window.history.pushState({}, '', '?'); // Clear form_id from URL
             } catch (err) {
                 setError('Error deleting form: ' + err.message);
