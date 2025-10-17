@@ -231,7 +231,7 @@ function LoginForm() {
             <p>
                 <i>
                 <button id="registering" onClick={handleToggleRegistering}>
-                    {isRegistering ? 'Have an account? Sign in' : 'Create Account'}
+                    {isRegistering ? 'Have an account? Sign in' : "Don't have an Account? Sign up"}
                 </button>
                 </i>
             </p>
