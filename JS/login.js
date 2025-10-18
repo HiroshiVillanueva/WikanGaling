@@ -225,13 +225,13 @@ function LoginForm() {
                         placeholderText="Re-enter password" // NEW PROP
                     />
                 )}
-                <p>{isRegistering ? "Please Sign Up if you don't have an account!" : " "}</p>
                 <button id="signing" type="submit">{isRegistering ? 'SIGN UP' : 'SIGN IN'}</button>
             </form>
             <p>
                 <i>
+                <p>{isRegistering ? "Please Sign Up if you don't have an account!" : " "}</p>
                 <button id="registering" onClick={handleToggleRegistering}>
-                    {isRegistering ? 'Have an account? Sign in' : "Don't have an Account? Sign up"}
+                    {isRegistering ? 'Have an account? Sign in' : "Create Account"}
                 </button>
                 </i>
             </p>
