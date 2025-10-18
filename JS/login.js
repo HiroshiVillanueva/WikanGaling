@@ -225,7 +225,7 @@ function LoginForm() {
                         placeholderText="Re-enter password" // NEW PROP
                     />
                 )}
-                <p>{isRegistering ? "Please Sign Up if you don't have an account!" : ''}</p>
+                <p>{isRegistering ? "Please Sign Up if you don't have an account!" : 'TEST'}</p>
                 <button id="signing" type="submit">{isRegistering ? 'SIGN UP' : 'SIGN IN'}</button>
             </form>
             <p>
