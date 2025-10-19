@@ -122,8 +122,8 @@
 #formPage {
     background-color: white;
     padding: 0 1em 1em 1em;
-    margin: 0em 1em 0 1em !important;
-    max-height: calc(100vh - 9.5em);
+    margin: 0em 1em 1em 1em !important;
+    max-height: calc(100vh - 11.5em);
 }
 
 #formPageSub {
