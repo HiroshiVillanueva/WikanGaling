@@ -301,7 +301,7 @@ function NotificationModal({ message, isLink, onClose }) {
             alignItems: 'center',
             zIndex: 1000,
         }}>
-            <div style={{
+            <div id="notificationModal" style={{
                 backgroundColor: 'white',
                 padding: '30px',
                 borderRadius: '8px',
@@ -316,7 +316,7 @@ function NotificationModal({ message, isLink, onClose }) {
                 
                 {isLink ? (
                     <>
-                        <p style={{ marginBottom: '10px' }}>
+                        <p style={{ marginBottom: '10px', color: 'black' }}>
                             Your module is now published. Share this link with students:
                         </p>
                         <a 
@@ -1221,16 +1221,32 @@ function App() {
     
     /** NEW HANDLER: Saves the form and displays the public link. */
     const handlePublishModule = async () => {
+        // 🛑 CRITICAL NEW VALIDATION LOGIC
+        if (!formId) {
+            setError("Cannot publish: Please create or load a form first.");
+            return;
+        }
+
+        // Check if there are any questions present
+        if (!formData.questions || formData.questions.length === 0) {
+            // Display the modal for empty module
+            setNotification({
+                show: true,
+                message: 'Cannot publish empty module. Please add at least one question.',
+                isLink: false 
+            });
+            return;
+        }
+
+        // Continue with save and publish if validation passes
         const success = await handleSaveForm(); // Wait for the save operation to complete
 
-        if (success && formId) {
+        if (success) {
             setNotification({
                 show: true,
                 message: formId, // Pass the formId as the message for link construction
                 isLink: true 
             });
-        } else if (!formId) {
-            setError("Cannot publish: Please create or load a form first.");
         }
     };
 

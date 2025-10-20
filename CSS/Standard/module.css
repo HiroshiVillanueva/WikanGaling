@@ -118,6 +118,10 @@
 
 
 
+#notificationModal p {
+    color: black !important;
+}
+
 
 #formPage {
     background-color: white;
